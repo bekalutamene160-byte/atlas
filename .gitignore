@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment & secrets — NEVER commit
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+secrets/
+
+# Project data (gitignored — too large for git)
+data/atlas.db
+data/atlas.db-journal
+data/embeddings_cache/
+data/corpus/*.pdf
+data/corpus/*.docx
+!data/corpus/.gitkeep
+!data/corpus/README.md
+
+# Logs
+logs/*.jsonl
+logs/*.log
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/

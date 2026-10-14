@@ -1,0 +1,76 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "atlas"
+version = "0.1.0"
+description = "ATLAS — Agentic Research & Knowledge Intelligence System for industrial maintenance"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "ATLAS Project" }]
+
+# Pinned versions = reproducible builds. A reviewer cloning this in 6 months
+# gets the exact same behavior you got today.
+dependencies = [
+    # Web framework
+    "fastapi==0.115.6",
+    "uvicorn[standard]==0.34.0",
+    # Validation & config
+    "pydantic==2.10.4",
+    "pydantic-settings==2.7.0",
+    # HTTP client (used by providers)
+    "httpx==0.28.1",
+    # Retry logic
+    "tenacity==9.0.0",
+    # LLM SDK (Groq)
+    "groq==0.15.0",
+    # Embeddings (local fallback)
+    "sentence-transformers==3.3.1",
+    # Vector store + persistence
+    "numpy==2.2.1",
+    "aiosqlite==0.20.0",
+    # Document parsing
+    "pdfplumber==0.11.5",
+    "python-docx==1.1.2",
+    "beautifulsoup4==4.12.3",
+    "markdown==3.7",
+    # Observability
+    "structlog==24.4.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.3.4",
+    "pytest-asyncio==0.25.2",
+    "pytest-cov==6.0.0",
+    "ruff==0.8.4",
+    "mypy==1.14.1",
+]
+
+[project.scripts]
+atlas = "atlas.api.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-v --tb=short --cov=atlas --cov-report=term-missing"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
