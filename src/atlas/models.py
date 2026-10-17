@@ -90,6 +90,11 @@ class Evidence(BaseModel):
 # Tool Protocol
 # =============================================================================
 
+class ToolArgs(BaseModel):
+    """Base class for tool argument schemas. Subclass for each tool."""
+    pass
+
+
 class ToolCall(BaseModel):
     """A request from the planner to execute a tool."""
     name: str
@@ -181,6 +186,7 @@ class AgentState(BaseModel):
     retrieved_evidence: list[Evidence] = Field(default_factory=list)
     tool_calls: list[ToolCall] = Field(default_factory=list)
     steps_taken: int = 0
+    cost_tokens: int = 0
     status: Literal[
         "planning", "retrieving", "synthesizing",
         "criticizing", "done", "refused"

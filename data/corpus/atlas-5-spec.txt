@@ -1,0 +1,32 @@
+﻿ATLAS-5 CENTRIFUGAL PUMP - SPECIFICATION SHEET
+================================================
+
+Model: Atlas-5
+Type: Multi-stage centrifugal pump
+Manufacturer: Atlas Industrial Pumps
+
+OPERATING SPECIFICATIONS
+------------------------
+Maximum operating pressure: 8 MPa (8000 kPa)
+Maximum operating temperature: 95 C (95 degrees Celsius)
+Rated flow rate: 120 m3/h (120 cubic meters per hour)
+Impeller diameter: 300 mm (300 millimeters)
+Motor power: 15 kW (15 kilowatts)
+Weight (without motor): 85 kg
+
+LUBRICATION
+-----------
+Bearing lubricant: ISO VG 68 mineral oil
+Lubrication interval: 750 operating hours
+
+INSPECTION INTERVALS
+--------------------
+Seal inspection: 500 operating hours
+Bearing inspection: 1500 operating hours
+Impeller inspection: 2500 operating hours
+
+SAFETY
+------
+Maximum noise level: 88 dB at 1 meter
+PPE required: Safety glasses, hearing protection, steel-toe boots, gloves
+Emergency stop: Located on motor control panel

@@ -13,7 +13,9 @@ class TestSettings:
 
     def test_defaults_are_mock_mode(self):
         """Default settings use mock LLM provider (no internet needed)."""
-        s = Settings()
+        # Use _env_file=None so the test doesn't read the real .env
+        # (which might have ATLAS_LLM_PROVIDER=groq for Day 4 testing)
+        s = Settings(_env_file=None)
         assert s.llm_provider == "mock"
         assert s.max_agent_steps == 8
         assert s.run_timeout_seconds == 60.0

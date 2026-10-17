@@ -63,6 +63,34 @@ class TestVectorStoreAdd:
         with pytest.raises(ValueError):
             vector_store.add(sample_chunks, [[1.0, 0.0, 0.0, 0.0]], "test-model")
 
+    def test_add_duplicate_ids_within_batch(self, vector_store):
+        chunk = Chunk(chunk_id="same", source="a.pdf", text="first", chunk_index=0)
+
+        vector_store.add(
+            [chunk, chunk],
+            [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0]],
+            "test-model",
+        )
+
+        assert vector_store.size == 1
+        assert vector_store.vectors.shape == (1, 4)
+        assert vector_store._conn.execute("SELECT COUNT(*) FROM chunks").fetchone()[0] == 1
+
+    def test_add_wrong_dimension_is_atomic(self, vector_store, sample_chunks):
+        """Adding a vector with wrong dimensions fails and nothing is written."""
+        # First add a valid chunk
+        vector_store.add([sample_chunks[0]], [[1.0, 0.0, 0.0, 0.0]], "test-model")
+        assert vector_store.size == 1
+        
+        # Now try to add a chunk with wrong dimensions (3 instead of 4)
+        with pytest.raises(ValueError, match="dimensions"):
+            vector_store.add([sample_chunks[1]], [[1.0, 0.0, 0.0]], "test-model")
+        
+        # The valid chunk should still be there (atomic - bad add didn't corrupt)
+        assert vector_store.size == 1
+        assert vector_store.vectors is not None
+        assert vector_store.vectors.shape == (1, 4)
+
 
 class TestVectorStoreSearch:
     """Tests for similarity search."""
@@ -127,6 +155,16 @@ class TestVectorStoreSearch:
         )
         assert results == []
 
+    def test_search_rejects_wrong_query_dimension(self, vector_store, sample_chunks, sample_vectors):
+        """Search with wrong query dimensions raises ValueError."""
+        vector_store.add(sample_chunks, sample_vectors, "test-model")
+        with pytest.raises(ValueError, match="dimensions"):
+            vector_store.search([1.0, 0.0], top_k=1)
+            
+    def test_search_rejects_nonpositive_top_k(self, vector_store):
+        with pytest.raises(ValueError, match="top_k"):
+            vector_store.search([1.0, 0.0, 0.0, 0.0], top_k=-1)
+
 
 class TestVectorStorePersistence:
     """Tests for SQLite persistence."""
@@ -161,3 +199,23 @@ class TestVectorStorePersistence:
         # Search should return empty
         results = vector_store.search([1.0, 0.0, 0.0, 0.0], top_k=5)
         assert results == []
+
+    def test_load_skips_rows_without_embeddings(self, tmp_path: Path, sample_chunks, sample_vectors):
+        db_path = str(tmp_path / "missing_embedding.db")
+        store = VectorStore(db_path=db_path, embedding_dims=4)
+        store._conn.execute(
+            "INSERT INTO chunks (chunk_id, source, text, chunk_index, created_at) "
+            "VALUES (?, ?, ?, ?, ?)",
+            ("missing", "b.pdf", "no embedding", 0, "2000-01-01 00:00:00"),
+        )
+        store._conn.commit()
+        store.add([sample_chunks[0]], [sample_vectors[0]], "test-model")
+        store.close()
+
+        reopened = VectorStore(db_path=db_path, embedding_dims=4)
+        try:
+            results = reopened.search([1.0, 0.0, 0.0, 0.0], top_k=5)
+            assert [result.chunk_id for result in results] == ["c1"]
+            assert reopened.size == 1
+        finally:
+            reopened.close()
