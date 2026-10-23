@@ -1,0 +1,41 @@
+# Render Blueprint — one-click deploy config
+# Anyone can deploy this project by going to:
+# render.com → New → Blueprint → connect GitHub repo → Render reads this file
+
+services:
+  - type: web
+    name: atlas-rag-agent
+    runtime: docker
+    plan: free  # upgrade to 'starter' for $7/mo when you need always-on
+    region: oregon  # closest to most US users; use frankfurt for EU
+    
+    # Build configuration
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    
+    # Deploy configuration
+    autoDeploy: true  # auto-deploy on every push to main
+    
+    # Environment variables
+    # Secrets are set via Render dashboard (never commit real keys)
+    envVars:
+      - key: ATLAS_LLM_PROVIDER
+        value: "groq"
+      - key: ATLAS_GROQ_API_KEY
+        sync: false  # set manually in dashboard — this is a secret
+      - key: ATLAS_EMBEDDING_PROVIDER
+        value: "jina"
+      - key: ATLAS_JINA_API_KEY
+        sync: false  # set manually in dashboard — this is a secret
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: PYTHONUNBUFFERED
+        value: "1"  # unbuffered stdout for real-time logs
+      - key: LOG_LEVEL
+        value: "INFO"
+      - key: ATLAS_DATA_DIR
+        value: "/app/data"
+    
+    # Health check — Render uses this to know if your app is alive
+    healthCheckPath: /health
+    healthCheckTimeout: 10

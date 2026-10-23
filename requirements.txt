@@ -1,0 +1,25 @@
+# ATLAS Production Dependencies
+# Pin versions for reproducible builds
+
+# Web framework
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+python-multipart==0.0.12
+
+# LLM providers
+groq==0.11.0
+
+# Embeddings
+requests==2.32.3
+
+# Vector store + data
+sqlite-utils==3.36
+pydantic==2.9.2
+
+# Utilities
+python-dotenv==1.0.1
+tenacity==9.0.0
+
+# Dev dependencies (not needed in production but harmless)
+pytest==8.3.3
+pytest-asyncio==0.24.0

@@ -72,8 +72,11 @@ CRITICAL RULES:
 4. If the evidence is contradictory, acknowledge the contradiction:
    "Evidence [e1] states X, while evidence [e3] states Y."
 
-5. Keep the answer concise: 2-4 paragraphs maximum. No filler, no preamble.
-   Start with the answer, not with "Based on the evidence..."
+5. 5. Keep the answer concise but COMPLETE: 2-4 paragraphs. Include the
+   specific value, the unit, and the source context. For example:
+   "The Atlas-3 centrifugal pump has an impeller diameter of 250 mm
+   according to the specification sheet [e1]."
+   Do NOT give one-word answers. Always state the full context
 
 6. Format citations as [eN] immediately after the claim, before the period:
    "The maximum operating pressure is 5 MPa [e1]."
@@ -83,12 +86,20 @@ CRITICAL RULES:
 
 8. If the query asks about something not in the evidence, say:
    "The provided documentation does not contain information about [topic]."
+   
+9. For COMPARISON queries (e.g., "compare X and Y"), you MUST cite
+   evidence for BOTH items being compared. For example:
+   "The Atlas-3 has a maximum pressure of 5 MPa [e1], while the
+   Atlas-5 has a maximum pressure of 8 MPa [e2]. The Atlas-5 has
+   a higher maximum operating pressure [e1] [e2]."
+   Always cite both sources when comparing two items.
 
 OUTPUT FORMAT:
 - Plain text (not JSON, not markdown)
 - 2-4 paragraphs
 - Inline citations [eN] after every factual claim
 - No sources list at the end (the agent loop adds that separately)"""
+
 
     def __init__(self, model: ModelProvider, model_name: Optional[str] = None):
         """Initialize the synthesizer.

@@ -49,50 +49,28 @@ class Planner:
 
 Your corpus contains:
 - Equipment specification sheets (pumps, motors, valves, compressors)
-  with operating parameters: pressure, temperature, flow rate, power ratings
-- Maintenance manuals with procedures: lubrication, inspection intervals,
-  overhaul steps, troubleshooting guides
-- Safety protocols: lockout-tagout (LOTO), PPE requirements, hazard classification
-- Inspection standards and failure analysis reports
+- Maintenance manuals with procedures
+- Safety protocols (lockout-tagout, PPE)
+- Inspection standards
 
 Your job is to decide the next action based on the current state.
 
 Available actions:
 - "retrieve": Search the corpus for more evidence. Requires a "query" field.
-  Use this when current evidence is insufficient to answer the user's question.
-  Write a focused, specific query that will find the exact information needed.
-  Examples of good queries:
-    * "Atlas-3 pump maximum operating pressure specification"
-    * "lubrication procedure for centrifugal pump bearings"
-    * "lockout tagout steps before pump maintenance"
-    * "inspection interval for Atlas-5 pump seals"
-  Examples of bad queries (too vague):
-    * "pumps"
-    * "maintenance"
-    * "information about the system"
+- "synthesize": Produce the final cited answer. Use this when you have ANY relevant evidence.
+- "refuse": Decline to answer.
 
-- "synthesize": Produce the final cited answer. Use this ONLY when you have
-  enough evidence to answer confidently. Do NOT carry a query field.
+CRITICAL RULES:
+1. After 1-2 successful retrievals, you MUST synthesize. Do not retrieve more than 2 times.
+2. If you have 5+ evidence chunks, you have enough. SYNTHESIZE immediately.
+3. If you have retrieved the same query twice, SYNTHESIZE with what you have.
+4. If the evidence sources include spec sheets or manuals, they likely contain the answer. SYNTHESIZE.
+5. Do NOT say "need more specific evidence" if you already have spec sheets. SYNTHESIZE.
+6. Only refuse if the query is clearly off-topic (baking, sports, programming, geography).
+7. For "refuse", explain what the user asked and why the corpus doesn't have it.
 
-- "refuse": Decline to answer. Use this when:
-  * The question is clearly outside the industrial maintenance domain
-    (e.g., baking, sports, programming, geography)
-  * You have tried retrieval 3+ times with no relevant results
-  * The corpus does not contain the specific equipment or procedure asked about
-  Provide a detailed reason (at least 20 characters) explaining why.
-
-Rules:
-- Be conservative: prefer one more retrieve over a premature synthesize.
-- For "retrieve", write a query that a search engine would understand.
-  Include the equipment name, the parameter/procedure, and any model number.
-- For "refuse", explain what the user asked and why the corpus doesn't have it.
-  Example: "The corpus contains industrial maintenance documentation (pump specs,
-  maintenance procedures, safety protocols) but does not address [user's topic]."
-
-Return JSON with this exact shape:
-{"action": "retrieve" | "synthesize" | "refuse", "query": "...", "reasoning": "..."}
-
-For "synthesize" and "refuse", the "query" field must be omitted or null."""
+Return JSON: {"action": "retrieve" | "synthesize" | "refuse", "query": "...", "reasoning": "..."}
+For "synthesize" and "refuse", "query" must be null."""
 
     def __init__(self, model: ModelProvider, model_name: Optional[str] = None):
         """Initialize the planner.

@@ -36,12 +36,12 @@ class Settings(BaseSettings):
 
     # --- Provider Selection ---
     llm_provider: Literal["groq", "mock"] = "mock"
-    embedding_provider: Literal["hf", "local", "mock"] = "local"
+    embedding_provider: Literal["hf", "local","jina","mock"] = "local"
 
     # --- Groq (LLM) ---
     groq_api_key: str = ""
-    groq_planner_model: str = "llama-3.3-70b-versatile"
-    groq_synthesizer_model: str = "llama-3.3-70b-versatile"
+    groq_planner_model: str = "openai/gpt-oss-20b"
+    groq_synthesizer_model: str = "openai/gpt-oss-120b"
     groq_critic_model: str = "llama-3.1-8b-instant"
 
     # --- HuggingFace (Embeddings) ---
@@ -49,6 +49,13 @@ class Settings(BaseSettings):
     hf_embedding_model: str = "BAAI/bge-small-en-v1.5"
     local_embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
     embedding_dimensions: int = 384
+        # --- Embeddings ---
+    embedding_provider: Literal["hf", "local", "mock", "jina"] = "local"
+    hf_api_token: str = ""
+    hf_embedding_model: str = "BAAI/bge-small-en-v1.5"
+    local_embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
+    jina_api_key: str = ""
+    embedding_dimensions: int = 768  # Updated for Jina v2
 
     # --- Agent Bounds ---
     max_agent_steps: int = Field(default=8, ge=1, le=50)

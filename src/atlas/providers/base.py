@@ -71,7 +71,7 @@ class ModelProvider(ABC):
         ...
 
     @abstractmethod
-    async def stream(
+    def stream(
         self,
         system: str,
         user: str,

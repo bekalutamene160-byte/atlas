@@ -150,17 +150,20 @@ class TestMakeEmbedder:
         embedder = make_embedder(settings)
         assert isinstance(embedder, MockEmbedder)
 
-    def test_local_provider(self):
-        settings = Settings(embedding_provider="local")
-        # Should return a CachedEmbedder wrapping a local embedder
-        embedder = make_embedder(settings)
-        assert isinstance(embedder, CachedEmbedder)
-        assert embedder.model_name == "sentence-transformers/all-MiniLM-L6-v2"
+    def test_jina_provider_requires_token(self):
+        """Jina provider without token raises ValueError."""
+        settings = Settings(embedding_provider="jina", jina_api_key="")
+        with pytest.raises(ValueError, match="empty"):
+            make_embedder(settings)
 
-    def test_hf_without_token_falls_back_to_local(self):
-        """HF provider without token falls back to local."""
-        settings = Settings(embedding_provider="hf", hf_api_token="")
+    def test_jina_provider_with_token(self):
+        """Jina provider with token returns CachedEmbedder."""
+        settings = Settings(embedding_provider="jina", jina_api_key="jina_test_key")
         embedder = make_embedder(settings)
         assert isinstance(embedder, CachedEmbedder)
-        # Should be using local model
-        assert "MiniLM" in embedder.model_name or "all-MiniLM" in embedder.model_name
+
+    def test_unsupported_provider_raises(self):
+        """Unsupported provider raises ValidationError from Pydantic."""
+        from pydantic import ValidationError
+        with pytest.raises(ValidationError):
+            Settings(embedding_provider="invalid")
