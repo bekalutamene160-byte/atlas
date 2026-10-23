@@ -1,18 +1,88 @@
 
-# ATLAS — RAG Agent for Equipment Specifications
+# ATLAS — RAG Agent for industrial maintenance 
 
-A retrieval-augmented generation (RAG) agent with a **planner → synthesizer → critic** architecture, built for querying industrial equipment specification documents with verifiable citations.
+
+A retrieval-augmented generation (RAG) agent with a **planner → synthesizer → critic** architecture, built for querying industrial maintenance  specification documents with verifiable citations.
 
 ![Python](https://img.shields.io/badge/python-3.11+-blue.svg)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-green.svg)
+![Live](https://img.shields.io/badge/live-demo-brightgreen.svg)
 ![Eval](https://img.shields.io/badge/eval-83.3%25-brightgreen.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
+
+## 🚀 Live Demo
+
+**Try it now:** [https://atlas-1k7u.onrender.com/docs](https://atlas-1k7u.onrender.com/docs)
+
+The API is deployed and live at **[https://atlas-1k7u.onrender.com](https://atlas-1k7u.onrender.com)**
+
+> ⚠️ **Note:** Render's free tier sleeps after 15 min of inactivity. The first request after sleep takes ~30-60s (cold start). Subsequent requests are fast (~5-20s).
+
+### Quick Test
+
+**Interactive Swagger UI** (easiest — just click "Try it out"):
+[https://atlas-1k7u.onrender.com/docs](https://atlas-1k7u.onrender.com/docs)
+
+**PowerShell:**
+```powershell
+$body = @{ query = "What is the maximum operating pressure of the Atlas-3 pump?" } | ConvertTo-Json
+Invoke-RestMethod -Uri "https://atlas-1k7u.onrender.com/chat" -Method Post -ContentType "application/json" -Body $body
+```
+
+**curl:**
+```bash
+curl -X POST https://atlas-1k7u.onrender.com/chat \
+  -H "Content-Type: application/json" \
+  -d '{"query": "What is the maximum operating pressure of the Atlas-3 pump?"}'
+```
+
+### Example Response
+```json
+{
+  "answer": "The Atlas-3 single-stage centrifugal pump is rated for a maximum operating pressure of 5 MPa (5000 kPa) according to its specification sheet [e1]...",
+  "citations": ["atlas-3-spec.txt"],
+  "iterations": 2,
+  "latency_ms": 18790,
+  "status": "completed",
+  "evidence_count": 5,
+  "cost_tokens": 21543,
+  "attempts": 1
+}
+```
 
 ## Why This Project Exists
 
 Most RAG demos retrieve chunks and generate answers — but they can't verify whether the answer is actually grounded in the source material. ATLAS solves this with a **critic component** that checks every claim against retrieved evidence before returning an answer. If the critic finds unsupported claims, the agent loops back and re-synthesizes.
 
 **Result: 83.3% eval pass rate with 1.00 grounding score and 1.00 citation quality on passing cases. 100% refusal rate on out-of-scope questions.**
+
+This project is deployed on [Render](https://render.com) using Docker.
+
+**Live URL:** [https://atlas-1k7u.onrender.com](https://atlas-1k7u.onrender.com)
+
+### Endpoints
+
+| Method | URL | Description |
+|--------|-----|-------------|
+| GET | [https://atlas-1k7u.onrender.com/health](https://atlas-1k7u.onrender.com/health) | Health check (used by Render for monitoring) |
+| GET | [https://atlas-1k7u.onrender.com/](https://atlas-1k7u.onrender.com/) | API info and eval results |
+| POST | [https://atlas-1k7u.onrender.com/chat](https://atlas-1k7u.onrender.com/chat) | Synchronous chat with the agent |
+| GET | [https://atlas-1k7u.onrender.com/docs](https://atlas-1k7u.onrender.com/docs) | Interactive Swagger documentation |
+
+### How to Deploy Yourself
+
+1. Fork this repo on GitHub
+2. Go to [render.com](https://render.com) → New → Web Service → connect your fork
+3. Render reads `render.yaml` and `Dockerfile` automatically
+4. Set these environment variables in the Render dashboard:
+   - `ATLAS_LLM_PROVIDER=groq`
+   - `ATLAS_GROQ_API_KEY=gsk_your_key`
+   - `ATLAS_EMBEDDING_PROVIDER=jina`
+   - `ATLAS_JINA_API_KEY=jln_your_key`
+5. Click "Create Web Service" — done in 3-5 minutes
+
+See `DEPLOYMENT.md` for detailed step-by-step instructions.
+```
 
 ## Architecture
 
