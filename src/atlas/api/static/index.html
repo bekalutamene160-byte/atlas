@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATLAS — Industrial Maintenance Research Assistant</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #2b6887;
+            --accent-light: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.15);
+            --text: #1e293b;
+            --text-light: #64748b;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --success-bg: #ecfdf5;
+            --error: #ef4444;
+            --error-bg: #fef2f2;
+            --warning: #f59e0b;
+            --warning-bg: #fffbeb;
+            --code-bg: #f1f5f9;
+            --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.05);
+            --radius: 12px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #2b6887 100%);
+            color: white;
+            padding: 2.5rem 1.5rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(59,130,246,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(43,104,135,0.15) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            position: relative;
+            background: linear-gradient(to right, #ffffff, #93c5fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .tagline {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            margin-top: 0.5rem;
+            position: relative;
+        }
+
+        .header .badge {
+            display: inline-block;
+            margin-top: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            background: rgba(59,130,246,0.15);
+            border: 1px solid rgba(59,130,246,0.3);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: #93c5fd;
+            font-weight: 500;
+            position: relative;
+        }
+
+        /* ===== MAIN CONTAINER ===== */
+        .container {
+            max-width: 760px;
+            margin: -1.5rem auto 2rem;
+            padding: 0 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== QUERY CARD ===== */
+        .query-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .query-card label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .query-input-row {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .query-input {
+            flex: 1;
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.2s;
+            background: var(--bg);
+        }
+
+        .query-input:focus {
+            border-color: var(--accent-light);
+            background: var(--card);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+
+        .ask-btn {
+            padding: 0.875rem 1.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .ask-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+        }
+
+        .ask-btn:active { transform: translateY(0); }
+        .ask-btn:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* ===== EXAMPLES ===== */
+        .examples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .example-chip {
+            font-size: 0.8rem;
+            padding: 0.35rem 0.8rem;
+            background: var(--code-bg);
+            color: var(--accent);
+            border-radius: 20px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            transition: all 0.15s;
+            font-weight: 500;
+        }
+
+        .example-chip:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        /* ===== STATUS BAR ===== */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: var(--card);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            min-height: 48px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .status-bar.hidden { display: none; }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2.5px solid var(--border);
+            border-top-color: var(--accent-light);
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .status-text {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .status-progress {
+            margin-left: auto;
+            display: flex;
+            gap: 4px;
+        }
+
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border);
+            transition: all 0.3s;
+        }
+
+        .progress-dot.active {
+            background: var(--accent-light);
+            box-shadow: 0 0 8px var(--accent-glow);
+        }
+
+        .progress-dot.done {
+            background: var(--success);
+        }
+
+        /* ===== ANSWER CARD ===== */
+        .answer-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            display: none;
+        }
+
+        .answer-card.visible { display: block; }
+
+        .answer-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .answer-header.success { background: var(--success-bg); }
+        .answer-header.refused { background: var(--warning-bg); }
+        .answer-header.error { background: var(--error-bg); }
+
+        .status-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .status-icon.success { background: var(--success); color: white; }
+        .status-icon.refused { background: var(--warning); color: white; }
+        .status-icon.error { background: var(--error); color: white; }
+
+        .answer-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .answer-body {
+            padding: 1.5rem;
+        }
+
+        .answer-text {
+            white-space: pre-wrap;
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+
+        .answer-text strong {
+            color: var(--accent);
+            background: var(--accent-glow);
+            padding: 0.1rem 0.3rem;
+            border-radius: 3px;
+        }
+
+        /* ===== CITATIONS ===== */
+        .citations-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .citations-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-light);
+            margin-bottom: 0.75rem;
+        }
+
+        .citation-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: var(--code-bg);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            border-left: 3px solid var(--accent);
+            transition: all 0.15s;
+        }
+
+        .citation-card:hover {
+            background: var(--accent-glow);
+            transform: translateX(2px);
+        }
+
+        .citation-id {
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 0.85rem;
+            min-width: 30px;
+        }
+
+        .citation-source {
+            font-size: 0.85rem;
+            color: var(--text);
+        }
+
+        .citation-source .page {
+            color: var(--text-light);
+            font-size: 0.8rem;
+        }
+
+        /* ===== META BAR ===== */
+        .meta-bar {
+            display: flex;
+            gap: 0;
+            padding: 1rem 1.5rem;
+            background: var(--bg);
+            border-top: 1px solid var(--border);
+        }
+
+        .meta-item {
+            flex: 1;
+            text-align: center;
+            border-right: 1px solid var(--border);
+        }
+
+        .meta-item:last-child { border-right: none; }
+
+        .meta-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .meta-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+            margin-top: 0.15rem;
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: var(--text-light);
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .empty-state p {
+            font-size: 0.95rem;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 640px) {
+            .header h1 { font-size: 1.75rem; }
+            .query-input-row { flex-direction: column; }
+            .ask-btn { width: 100%; }
+            .meta-bar { flex-wrap: wrap; }
+            .meta-item { flex: 50%; border-bottom: 1px solid var(--border); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>ATLAS</h1>
+        <p class="tagline">Evidence-Grounded Industrial Maintenance Research Assistant</p>
+        <span class="badge">Powered by Groq &middot; RAG &middot; Cited Answers</span>
+    </div>
+
+    <div class="container">
+        <div class="query-card">
+            <label>Research Query</label>
+            <div class="query-input-row">
+                <input type="text" class="query-input" id="query"
+                       placeholder="Ask about equipment specs, maintenance procedures, or safety protocols..."
+                       autocomplete="off" onkeypress="handleKeypress(event)">
+                <button class="ask-btn" id="askBtn" onclick="ask()">Ask ATLAS</button>
+            </div>
+            <div class="examples">
+                <span class="example-chip" onclick="fillExample('What is the maximum operating pressure of the Atlas-3 pump?')">Atlas-3 Pressure</span>
+                <span class="example-chip" onclick="fillExample('What lubricant is specified for the Atlas-3 pump bearings?')">Atlas-3 Lubricant</span>
+                <span class="example-chip" onclick="fillExample('Compare the inspection intervals for Atlas-3 and Atlas-5 pumps.')">Compare Pumps</span>
+                <span class="example-chip" onclick="fillExample('What are the lockout-tagout steps before maintenance?')">Lockout-Tagout</span>
+                <span class="example-chip" onclick="fillExample('How do I bake sourdough bread?')">Off-Topic Test</span>
+            </div>
+        </div>
+
+        <div class="status-bar hidden" id="statusBar">
+            <div class="spinner" id="spinner"></div>
+            <span class="status-text" id="statusText">Initializing...</span>
+            <div class="status-progress" id="progressDots">
+                <div class="progress-dot" id="dot1"></div>
+                <div class="progress-dot" id="dot2"></div>
+                <div class="progress-dot" id="dot3"></div>
+            </div>
+        </div>
+
+        <div class="answer-card" id="answerCard">
+            <div class="answer-header" id="answerHeader">
+                <div class="status-icon" id="statusIcon"></div>
+                <span class="answer-title" id="answerTitle"></span>
+            </div>
+            <div class="answer-body">
+                <div class="answer-text" id="answerText"></div>
+                <div class="citations-section" id="citationsSection" style="display:none;">
+                    <div class="citations-title">Sources &amp; Evidence</div>
+                    <div id="citationList"></div>
+                </div>
+            </div>
+            <div class="meta-bar" id="metaBar"></div>
+        </div>
+
+        <div class="empty-state" id="emptyState">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <p>Ask a question about industrial maintenance to get started.</p>
+        </div>
+    </div>
+
+    <script>
+        const queryInput = document.getElementById('query');
+        const askBtn = document.getElementById('askBtn');
+        const statusBar = document.getElementById('statusBar');
+        const statusText = document.getElementById('statusText');
+        const answerCard = document.getElementById('answerCard');
+        const answerHeader = document.getElementById('answerHeader');
+        const statusIcon = document.getElementById('statusIcon');
+        const answerTitle = document.getElementById('answerTitle');
+        const answerText = document.getElementById('answerText');
+        const citationsSection = document.getElementById('citationsSection');
+        const citationList = document.getElementById('citationList');
+        const metaBar = document.getElementById('metaBar');
+        const emptyState = document.getElementById('emptyState');
+        const dots = [
+            document.getElementById('dot1'),
+            document.getElementById('dot2'),
+            document.getElementById('dot3')
+        ];
+
+        function fillExample(text) {
+            queryInput.value = text;
+            queryInput.focus();
+        }
+
+        function handleKeypress(e) {
+            if (e.key === 'Enter') ask();
+        }
+
+        function showStatus(msg, activeDot = -1) {
+            statusBar.classList.remove('hidden');
+            statusText.textContent = msg;
+            dots.forEach((dot, i) => {
+                dot.classList.remove('active', 'done');
+                if (i < activeDot) dot.classList.add('done');
+                if (i === activeDot) dot.classList.add('active');
+            });
+        }
+
+        function hideStatus() {
+            statusBar.classList.add('hidden');
+        }
+
+        function hideEmpty() {
+            emptyState.style.display = 'none';
+        }
+
+        function showCard() {
+            answerCard.classList.add('visible');
+        }
+
+        function setHeader(type, title) {
+            answerHeader.className = 'answer-header ' + type;
+            statusIcon.className = 'status-icon ' + type;
+            const icons = { success: '\u2713', refused: '!', error: '\u00d7' };
+            statusIcon.textContent = icons[type] || '';
+            answerTitle.textContent = title;
+        }
+
+        function showAnswer(result) {
+            answerText.innerHTML = formatAnswer(result.answer || '');
+            answerText.style.color = '';
+
+            if (result.citations && result.citations.length > 0) {
+                citationList.innerHTML = result.citations.map(c =>
+                    `<div class="citation-card">
+                        <span class="citation-id">[${c.evidence_id}]</span>
+                        <span class="citation-source">${c.source}${c.page ? ' <span class="page">p.' + c.page + '</span>' : ''}</span>
+                    </div>`
+                ).join('');
+                citationsSection.style.display = 'block';
+            } else {
+                citationsSection.style.display = 'none';
+            }
+
+            metaBar.innerHTML = `
+                <div class="meta-item">
+                    <div class="meta-value">${result.steps_taken || 0}</div>
+                    <div class="meta-label">Steps</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-value">${result.evidence_count || 0}</div>
+                    <div class="meta-label">Evidence</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-value">${result.cost_tokens || 0}</div>
+                    <div class="meta-label">Tokens</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-value" style="font-size:0.8rem;word-break:break-all;">${(result.run_id || '').slice(0, 8)}</div>
+                    <div class="meta-label">Run ID</div>
+                </div>
+            `;
+
+            setHeader('success', 'Answer');
+            showCard();
+        }
+
+        function showRefusal(result) {
+            answerText.innerHTML = result.reason || 'No reason provided';
+            answerText.style.color = 'var(--warning)';
+            citationsSection.style.display = 'none';
+            metaBar.innerHTML = `
+                <div class="meta-item">
+                    <div class="meta-value">${result.steps_taken || 0}</div>
+                    <div class="meta-label">Steps</div>
+                </div>
+            `;
+            setHeader('refused', 'Query Refused');
+            showCard();
+        }
+
+        function showError(message) {
+            answerText.innerHTML = message;
+            answerText.style.color = 'var(--error)';
+            citationsSection.style.display = 'none';
+            metaBar.innerHTML = '';
+            setHeader('error', 'Error');
+            showCard();
+        }
+
+        function formatAnswer(text) {
+            return text.replace(/\[(e\d+)\]/g, '<strong>[$1]</strong>');
+        }
+
+        async function ask() {
+            const query = queryInput.value.trim();
+            if (!query) return;
+
+            askBtn.disabled = true;
+            answerCard.classList.remove('visible');
+            hideEmpty();
+            showStatus('Initializing agent...', 0);
+
+            try {
+                const response = await fetch('/stream', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: query }),
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop();
+
+                    for (const line of lines) {
+                        if (!line.startsWith('data: ')) continue;
+                        try {
+                            handleEvent(JSON.parse(line.slice(6)));
+                        } catch (e) {}
+                    }
+                }
+
+                hideStatus();
+            } catch (error) {
+                hideStatus();
+                showError(error.message);
+            } finally {
+                askBtn.disabled = false;
+            }
+        }
+
+        function handleEvent(event) {
+            const statusMap = {
+                'planning': { msg: 'Planning next action...', dot: 0 },
+                'retrieving': { msg: 'Searching documentation...', dot: 1 },
+                'synthesizing': { msg: 'Writing cited answer...', dot: 2 },
+                'criticizing': { msg: 'Verifying claims...', dot: 2 },
+                'critic_rejected': { msg: 'Critic found issues, retrying...', dot: 0 }
+            };
+
+            switch (event.type) {
+                case 'start':
+                    showStatus('Agent initialized, starting...', 0);
+                    break;
+                case 'step':
+                    const s = statusMap[event.status];
+                    if (s) showStatus(s.msg, s.dot);
+                    break;
+                case 'evidence':
+                    showStatus(`Found ${event.count} evidence chunks`, 1);
+                    break;
+                case 'done':
+                    showAnswer(event.result);
+                    break;
+                case 'refused':
+                    showRefusal(event.result);
+                    break;
+                case 'partial':
+                    showStatus(`Partial: ${event.result?.reason || 'unknown'}`, -1);
+                    setTimeout(() => {
+                        answerText.innerHTML = `<em>Could not complete: ${event.result?.reason || 'unknown'}</em>`;
+                        setHeader('error', 'Partial Result');
+                        showCard();
+                    }, 500);
+                    break;
+                case 'error':
+                    showError(event.result?.error_message || event.message || 'Unknown error');
+                    break;
+            }
+        }
+    </script>
+</body>
+</html>
