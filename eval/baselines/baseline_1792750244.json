@@ -1,0 +1,150 @@
+{
+  "timestamp": "2026-10-23T10:10:44.935638+00:00",
+  "summary": {
+    "total": 6,
+    "passed": 2,
+    "success_rate": 0.3333333333333333,
+    "avg_grounding": 1.0,
+    "avg_citation": 1.0,
+    "avg_latency": 24.810233036677044
+  },
+  "categories": {
+    "factual": {
+      "total": 2,
+      "passed": 0,
+      "grounding_scores": [],
+      "citation_scores": [],
+      "success_rate": 0.0,
+      "avg_grounding": 0.0,
+      "avg_citation": 0.0
+    },
+    "multi_hop": {
+      "total": 1,
+      "passed": 0,
+      "grounding_scores": [],
+      "citation_scores": [],
+      "success_rate": 0.0,
+      "avg_grounding": 0.0,
+      "avg_citation": 0.0
+    },
+    "ambiguous": {
+      "total": 1,
+      "passed": 0,
+      "grounding_scores": [],
+      "citation_scores": [],
+      "success_rate": 0.0,
+      "avg_grounding": 0.0,
+      "avg_citation": 0.0
+    },
+    "off_topic": {
+      "total": 2,
+      "passed": 2,
+      "grounding_scores": [
+        1.0,
+        1.0
+      ],
+      "citation_scores": [
+        1.0,
+        1.0
+      ],
+      "success_rate": 1.0,
+      "avg_grounding": 1.0,
+      "avg_citation": 1.0
+    }
+  },
+  "results": [
+    {
+      "case_id": "fact_01",
+      "category": "factual",
+      "passed": false,
+      "answer": "The Atlas‑3 centrifugal pump has a maximum operating pressure of 5 MPa (5000 kPa) [e1]. This specification is listed in the operating specifications section of the Atlas‑3 specification sheet, which identifies the pump as a single‑stage centrifugal pump manufactured by Atlas Industrial Pumps [e1].",
+      "grounding_score": 1.0,
+      "citation_quality": 1.0,
+      "latency_s": 10.932945728302002,
+      "error": "",
+      "citations": [
+        {
+          "evidence_id": "e1",
+          "source": "data\\corpus\\atlas-3-spec.txt",
+          "page": 1,
+          "section": null
+        }
+      ]
+    },
+    {
+      "case_id": "fact_05",
+      "category": "factual",
+      "passed": false,
+      "answer": "The Atlas‑3 single‑stage centrifugal pump is rated for a maximum operating temperature of 80 °C (80 degrees Celsius) according to its specification sheet [e1]. This temperature limit is part of the pump’s operating specifications, which also include a maximum pressure of 5 MPa, a rated flow rate of 90 m³/h, an impeller diameter of 250 mm, and a motor power of 11 kW [e1].",
+      "grounding_score": 1.0,
+      "citation_quality": 1.0,
+      "latency_s": 5.006060361862183,
+      "error": "",
+      "citations": [
+        {
+          "evidence_id": "e1",
+          "source": "data\\corpus\\atlas-3-spec.txt",
+          "page": 1,
+          "section": null
+        }
+      ]
+    },
+    {
+      "case_id": "multi_01",
+      "category": "multi_hop",
+      "passed": false,
+      "answer": "The Atlas-5 centrifugal pump is rated for a maximum operating pressure of 8 MPa (8000 kPa) [e1]. In contrast, the Atlas-3 centrifugal pump has a lower maximum operating pressure of 5 MPa (5000 kPa) [e2].\n\nTherefore, the Atlas-5 can handle a pressure that is 3 MPa (3000 kPa) higher than the Atlas-3, indicating a higher pressure capability for the multi‑stage design of the Atlas-5 compared with the single‑stage Atlas-3 [e1] [e2].",
+      "grounding_score": 1.0,
+      "citation_quality": 1.0,
+      "latency_s": 37.8552930355072,
+      "error": "",
+      "citations": [
+        {
+          "evidence_id": "e1",
+          "source": "data\\corpus\\atlas-5-spec.txt",
+          "page": 1,
+          "section": null
+        },
+        {
+          "evidence_id": "e2",
+          "source": "data\\corpus\\atlas-3-spec.txt",
+          "page": 1,
+          "section": null
+        }
+      ]
+    },
+    {
+      "case_id": "ambig_01",
+      "category": "ambiguous",
+      "passed": false,
+      "answer": "timeout",
+      "grounding_score": 0.0,
+      "citation_quality": 0.5,
+      "latency_s": 90.01342272758484,
+      "error": "",
+      "citations": []
+    },
+    {
+      "case_id": "off_01",
+      "category": "off_topic",
+      "passed": true,
+      "answer": "The user asked for instructions on baking sourdough bread, which is unrelated to the industrial maintenance documentation corpus that contains equipment specs, maintenance manuals, safety protocols, and inspection standards.",
+      "grounding_score": 1.0,
+      "citation_quality": 1.0,
+      "latency_s": 3.6953437328338623,
+      "error": "",
+      "citations": []
+    },
+    {
+      "case_id": "off_02",
+      "category": "off_topic",
+      "passed": true,
+      "answer": "The user asked for the capital of France, which is a geography question. The corpus only contains industrial maintenance documentation such as equipment specs, manuals, safety protocols, and inspection standards, so it does not contain information about world capitals.",
+      "grounding_score": 1.0,
+      "citation_quality": 1.0,
+      "latency_s": 1.358332633972168,
+      "error": "",
+      "citations": []
+    }
+  ]
+}

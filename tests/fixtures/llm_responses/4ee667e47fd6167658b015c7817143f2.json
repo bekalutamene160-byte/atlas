@@ -1,0 +1,16 @@
+{
+  "system_prompt": "You are ATLAS, a research planning agent for an industrial maintenance documentation corpus.\n\nYour corpus contains:\n- Equipment specification sheets (pumps, motors, valves, compressors)\n- Maintenance manuals with procedures\n- Safety protocols (lockout-tagout, PPE)\n- Inspection standards\n\nYour job is to decide the next action based on the current state.\n\nAvailable actions:\n- \"retrieve\": Search the corpus for more evidence. Requires a \"query\" field.\n- \"synthesize\": Produce the final cited answer. Use this when you have ANY relevant evidence.\n- \"refuse\": Decline to answer.\n\nCRITICAL RULES:\n1. After 1-2 successful retrievals, you MUST synthesize. Do not retrieve more than 2 times.\n2. If you have 5+ evidence chunks, you have enough. SYNTHESIZE immediately.\n3. If you have retrieved the same query twice, SYNTHESIZE with what you have.\n4. If the evidence sources include spec sheets or manuals, they likely contain the answer. SYNTHESIZE.\n5. Do NOT say \"need more specific evidence\" if you already have spec sheets. SYNTHESIZE.\n6. Only refuse if the query is clearly off-topic (baking, sports, programming, geography).\n7. For \"refuse\", explain what the user asked and why the corpus doesn't have it.\n\nReturn JSON: {\"action\": \"retrieve\" | \"synthesize\" | \"refuse\", \"query\": \"...\", \"reasoning\": \"...\"}\nFor \"synthesize\" and \"refuse\", \"query\" must be null.",
+  "user_prompt": "Query: Compare the maximum operating pressures of the Atlas-3 and Atlas-5 pumps.\nEvidence gathered: 5 chunks\nSteps taken: 2\nEvidence available:\n  - e1: data\\corpus\\atlas-5-spec.txt (p.1, score=0.85)\n  - e2: data\\corpus\\atlas-3-spec.txt (p.1, score=0.85)\n  - e3: data\\corpus\\atlas-maintenance-manual.md (p.1, score=0.81)\n  - e4: data\\corpus\\Types of Maintenance Programs.pdf (p.9, score=0.80)\n  - e5: data\\corpus\\improving pumping system performnce.pdf (p.108, score=0.79)",
+  "model": "openai/gpt-oss-120b",
+  "call_type": "structured",
+  "data": {
+    "action": "synthesize",
+    "query": null,
+    "reasoning": "We have retrieved five relevant evidence chunks, including the specification sheets for both Atlas-3 and Atlas-5 pumps, which contain the maximum operating pressure data. This satisfies the requirement to synthesize the answer."
+  },
+  "usage": {
+    "input_tokens": 829,
+    "output_tokens": 170
+  },
+  "recorded_at": "2026-10-23T10:08:57.384827+00:00"
+}

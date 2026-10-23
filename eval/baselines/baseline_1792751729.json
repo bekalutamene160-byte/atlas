@@ -1,0 +1,117 @@
+{
+  "timestamp": "2026-10-23T10:35:29.736054+00:00",
+  "summary": {
+    "total": 6,
+    "passed": 0,
+    "success_rate": 0.0,
+    "avg_grounding": 0.0,
+    "avg_citation": 0.0,
+    "avg_latency": 0.0045509735743204755
+  },
+  "categories": {
+    "factual": {
+      "total": 2,
+      "passed": 0,
+      "grounding_scores": [],
+      "citation_scores": [],
+      "success_rate": 0.0,
+      "avg_grounding": 0.0,
+      "avg_citation": 0.0
+    },
+    "multi_hop": {
+      "total": 1,
+      "passed": 0,
+      "grounding_scores": [],
+      "citation_scores": [],
+      "success_rate": 0.0,
+      "avg_grounding": 0.0,
+      "avg_citation": 0.0
+    },
+    "ambiguous": {
+      "total": 1,
+      "passed": 0,
+      "grounding_scores": [],
+      "citation_scores": [],
+      "success_rate": 0.0,
+      "avg_grounding": 0.0,
+      "avg_citation": 0.0
+    },
+    "off_topic": {
+      "total": 2,
+      "passed": 0,
+      "grounding_scores": [],
+      "citation_scores": [],
+      "success_rate": 0.0,
+      "avg_grounding": 0.0,
+      "avg_citation": 0.0
+    }
+  },
+  "results": [
+    {
+      "case_id": "fact_01",
+      "category": "factual",
+      "passed": false,
+      "answer": "",
+      "grounding_score": 0.0,
+      "citation_quality": 0.5,
+      "latency_s": 0.018173694610595703,
+      "error": "",
+      "citations": []
+    },
+    {
+      "case_id": "fact_05",
+      "category": "factual",
+      "passed": false,
+      "answer": "",
+      "grounding_score": 0.0,
+      "citation_quality": 0.5,
+      "latency_s": 0.001920461654663086,
+      "error": "",
+      "citations": []
+    },
+    {
+      "case_id": "multi_01",
+      "category": "multi_hop",
+      "passed": false,
+      "answer": "",
+      "grounding_score": 0.0,
+      "citation_quality": 0.5,
+      "latency_s": 0.002069234848022461,
+      "error": "",
+      "citations": []
+    },
+    {
+      "case_id": "ambig_01",
+      "category": "ambiguous",
+      "passed": false,
+      "answer": "",
+      "grounding_score": 0.0,
+      "citation_quality": 0.5,
+      "latency_s": 0.002404928207397461,
+      "error": "",
+      "citations": []
+    },
+    {
+      "case_id": "off_01",
+      "category": "off_topic",
+      "passed": false,
+      "answer": "",
+      "grounding_score": 0.0,
+      "citation_quality": 0.0,
+      "latency_s": 0.001984834671020508,
+      "error": "",
+      "citations": []
+    },
+    {
+      "case_id": "off_02",
+      "category": "off_topic",
+      "passed": false,
+      "answer": "",
+      "grounding_score": 0.0,
+      "citation_quality": 0.0,
+      "latency_s": 0.0007526874542236328,
+      "error": "",
+      "citations": []
+    }
+  ]
+}

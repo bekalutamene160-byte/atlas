@@ -1,0 +1,400 @@
+{
+  "total_cases": 20,
+  "total_passed": 9,
+  "success_rate": 45.0,
+  "avg_grounding_score": 0.2,
+  "avg_citation_quality": 0.2,
+  "avg_latency": 24.09,
+  "categories": {
+    "factual": {
+      "total": 8,
+      "passed": 2,
+      "pass_rate": 25.0,
+      "avg_grounding": 0.38,
+      "avg_citation": 0.38
+    },
+    "multi_hop": {
+      "total": 4,
+      "passed": 0,
+      "pass_rate": 0.0,
+      "avg_grounding": 0.25,
+      "avg_citation": 0.25
+    },
+    "ambiguous": {
+      "total": 4,
+      "passed": 3,
+      "pass_rate": 75.0,
+      "avg_grounding": 0.0,
+      "avg_citation": 0.0
+    },
+    "off_topic": {
+      "total": 4,
+      "passed": 4,
+      "pass_rate": 100.0,
+      "avg_grounding": 0.0,
+      "avg_citation": 0.0
+    }
+  },
+  "details": [
+    {
+      "case_id": "fact_01",
+      "category": "factual",
+      "query": "What is the maximum operating pressure of the Atlas-3 centrifugal pump?",
+      "passed": false,
+      "metrics": {
+        "task_success": false,
+        "tool_correctness": true,
+        "grounding_score": 0.0,
+        "citation_quality": 0.0
+      },
+      "elapsed_seconds": 12.45,
+      "error": null,
+      "response_status": "partial",
+      "evidence_count": 5,
+      "steps_taken": 4,
+      "cost_tokens": 4905
+    },
+    {
+      "case_id": "fact_02",
+      "category": "factual",
+      "query": "What is the rated flow rate of the Atlas-5 pump?",
+      "passed": true,
+      "metrics": {
+        "task_success": true,
+        "tool_correctness": true,
+        "grounding_score": 1.0,
+        "citation_quality": 1.0
+      },
+      "elapsed_seconds": 4.95,
+      "error": null,
+      "response_status": "done",
+      "evidence_count": 5,
+      "steps_taken": 3,
+      "cost_tokens": 7687
+    },
+    {
+      "case_id": "fact_03",
+      "category": "factual",
+      "query": "What lubricant is specified for the Atlas-3 pump bearings?",
+      "passed": false,
+      "metrics": {
+        "task_success": false,
+        "tool_correctness": true,
+        "grounding_score": 0.0,
+        "citation_quality": 0.0
+      },
+      "elapsed_seconds": 40.46,
+      "error": null,
+      "response_status": "partial",
+      "evidence_count": 5,
+      "steps_taken": 4,
+      "cost_tokens": 4754
+    },
+    {
+      "case_id": "fact_04",
+      "category": "factual",
+      "query": "What is the inspection interval for the Atlas-5 pump seals?",
+      "passed": false,
+      "metrics": {
+        "task_success": false,
+        "tool_correctness": true,
+        "grounding_score": 0.0,
+        "citation_quality": 0.0
+      },
+      "elapsed_seconds": 41.23,
+      "error": null,
+      "response_status": "partial",
+      "evidence_count": 6,
+      "steps_taken": 7,
+      "cost_tokens": 8501
+    },
+    {
+      "case_id": "fact_05",
+      "category": "factual",
+      "query": "What is the maximum operating temperature of the Atlas-3 pump?",
+      "passed": true,
+      "metrics": {
+        "task_success": true,
+        "tool_correctness": true,
+        "grounding_score": 1.0,
+        "citation_quality": 1.0
+      },
+      "elapsed_seconds": 23.42,
+      "error": null,
+      "response_status": "done",
+      "evidence_count": 5,
+      "steps_taken": 3,
+      "cost_tokens": 6756
+    },
+    {
+      "case_id": "fact_06",
+      "category": "factual",
+      "query": "What is the motor power rating of the Atlas-5 pump?",
+      "passed": false,
+      "metrics": {
+        "task_success": false,
+        "tool_correctness": true,
+        "grounding_score": 0.0,
+        "citation_quality": 0.0
+      },
+      "elapsed_seconds": 22.51,
+      "error": null,
+      "response_status": "partial",
+      "evidence_count": 5,
+      "steps_taken": 4,
+      "cost_tokens": 5255
+    },
+    {
+      "case_id": "fact_07",
+      "category": "factual",
+      "query": "What is the impeller diameter of the Atlas-3 pump?",
+      "passed": false,
+      "metrics": {
+        "task_success": false,
+        "tool_correctness": true,
+        "grounding_score": 1.0,
+        "citation_quality": 1.0
+      },
+      "elapsed_seconds": 22.25,
+      "error": null,
+      "response_status": "done",
+      "evidence_count": 5,
+      "steps_taken": 4,
+      "cost_tokens": 8777
+    },
+    {
+      "case_id": "fact_08",
+      "category": "factual",
+      "query": "What is the weight of the Atlas-5 pump without motor?",
+      "passed": false,
+      "metrics": {
+        "task_success": false,
+        "tool_correctness": true,
+        "grounding_score": 0.0,
+        "citation_quality": 0.0
+      },
+      "elapsed_seconds": 47.73,
+      "error": null,
+      "response_status": "partial",
+      "evidence_count": 8,
+      "steps_taken": 8,
+      "cost_tokens": 9640
+    },
+    {
+      "case_id": "multi_01",
+      "category": "multi_hop",
+      "query": "Compare the maximum operating pressures of the Atlas-3 and Atlas-5 pumps.",
+      "passed": false,
+      "metrics": {
+        "task_success": false,
+        "tool_correctness": true,
+        "grounding_score": 0.0,
+        "citation_quality": 0.0
+      },
+      "elapsed_seconds": 60.01,
+      "error": null,
+      "response_status": "partial",
+      "evidence_count": 7,
+      "steps_taken": 6,
+      "cost_tokens": 15149
+    },
+    {
+      "case_id": "multi_02",
+      "category": "multi_hop",
+      "query": "Which pump has a higher flow rate, and by how much?",
+      "passed": false,
+      "metrics": {
+        "task_success": false,
+        "tool_correctness": true,
+        "grounding_score": 0.0,
+        "citation_quality": 0.0
+      },
+      "elapsed_seconds": 60.01,
+      "error": null,
+      "response_status": "partial",
+      "evidence_count": 13,
+      "steps_taken": 5,
+      "cost_tokens": 6523
+    },
+    {
+      "case_id": "multi_03",
+      "category": "multi_hop",
+      "query": "What are the lubrication requirements for both the Atlas-3 and Atlas-5 pumps?",
+      "passed": false,
+      "metrics": {
+        "task_success": false,
+        "tool_correctness": true,
+        "grounding_score": 1.0,
+        "citation_quality": 1.0
+      },
+      "elapsed_seconds": 22.35,
+      "error": null,
+      "response_status": "done",
+      "evidence_count": 6,
+      "steps_taken": 3,
+      "cost_tokens": 8823
+    },
+    {
+      "case_id": "multi_04",
+      "category": "multi_hop",
+      "query": "Compare the inspection intervals for the Atlas-3 and Atlas-5 pumps.",
+      "passed": false,
+      "metrics": {
+        "task_success": false,
+        "tool_correctness": true,
+        "grounding_score": 0.0,
+        "citation_quality": 0.0
+      },
+      "elapsed_seconds": 43.51,
+      "error": null,
+      "response_status": "partial",
+      "evidence_count": 8,
+      "steps_taken": 8,
+      "cost_tokens": 16103
+    },
+    {
+      "case_id": "ambig_01",
+      "category": "ambiguous",
+      "query": "Tell me about the pump.",
+      "passed": true,
+      "metrics": {
+        "task_success": true,
+        "tool_correctness": false,
+        "grounding_score": 0.0,
+        "citation_quality": 0.0
+      },
+      "elapsed_seconds": 13.92,
+      "error": null,
+      "response_status": "refused",
+      "evidence_count": 12,
+      "steps_taken": 4,
+      "cost_tokens": 5113
+    },
+    {
+      "case_id": "ambig_02",
+      "category": "ambiguous",
+      "query": "What is the maintenance schedule?",
+      "passed": true,
+      "metrics": {
+        "task_success": true,
+        "tool_correctness": false,
+        "grounding_score": 0.0,
+        "citation_quality": 0.0
+      },
+      "elapsed_seconds": 2.62,
+      "error": null,
+      "response_status": "refused",
+      "evidence_count": 0,
+      "steps_taken": 1,
+      "cost_tokens": 1236
+    },
+    {
+      "case_id": "ambig_03",
+      "category": "ambiguous",
+      "query": "What are the safety requirements?",
+      "passed": false,
+      "metrics": {
+        "task_success": false,
+        "tool_correctness": false,
+        "grounding_score": 0.0,
+        "citation_quality": 0.0
+      },
+      "elapsed_seconds": 60.01,
+      "error": null,
+      "response_status": "partial",
+      "evidence_count": 0,
+      "steps_taken": 2,
+      "cost_tokens": 2312
+    },
+    {
+      "case_id": "ambig_04",
+      "category": "ambiguous",
+      "query": "How often should I inspect it?",
+      "passed": true,
+      "metrics": {
+        "task_success": true,
+        "tool_correctness": false,
+        "grounding_score": 0.0,
+        "citation_quality": 0.0
+      },
+      "elapsed_seconds": 1.9,
+      "error": null,
+      "response_status": "refused",
+      "evidence_count": 0,
+      "steps_taken": 1,
+      "cost_tokens": 1285
+    },
+    {
+      "case_id": "off_01",
+      "category": "off_topic",
+      "query": "How do I bake sourdough bread?",
+      "passed": true,
+      "metrics": {
+        "task_success": true,
+        "tool_correctness": true,
+        "grounding_score": 0.0,
+        "citation_quality": 0.0
+      },
+      "elapsed_seconds": 0.44,
+      "error": null,
+      "response_status": "refused",
+      "evidence_count": 0,
+      "steps_taken": 1,
+      "cost_tokens": 989
+    },
+    {
+      "case_id": "off_02",
+      "category": "off_topic",
+      "query": "What is the capital of France?",
+      "passed": true,
+      "metrics": {
+        "task_success": true,
+        "tool_correctness": true,
+        "grounding_score": 0.0,
+        "citation_quality": 0.0
+      },
+      "elapsed_seconds": 0.75,
+      "error": null,
+      "response_status": "refused",
+      "evidence_count": 0,
+      "steps_taken": 1,
+      "cost_tokens": 986
+    },
+    {
+      "case_id": "off_03",
+      "category": "off_topic",
+      "query": "Who won the 2022 FIFA World Cup?",
+      "passed": true,
+      "metrics": {
+        "task_success": true,
+        "tool_correctness": true,
+        "grounding_score": 0.0,
+        "citation_quality": 0.0
+      },
+      "elapsed_seconds": 0.87,
+      "error": null,
+      "response_status": "refused",
+      "evidence_count": 0,
+      "steps_taken": 1,
+      "cost_tokens": 1008
+    },
+    {
+      "case_id": "off_04",
+      "category": "off_topic",
+      "query": "Write a Python function to sort a list.",
+      "passed": true,
+      "metrics": {
+        "task_success": true,
+        "tool_correctness": true,
+        "grounding_score": 0.0,
+        "citation_quality": 0.0
+      },
+      "elapsed_seconds": 0.42,
+      "error": null,
+      "response_status": "refused",
+      "evidence_count": 0,
+      "steps_taken": 1,
+      "cost_tokens": 993
+    }
+  ]
+}
