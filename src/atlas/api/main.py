@@ -287,28 +287,53 @@ def _extract_response_fields(result: Any) -> dict:
             "run_id": result.get("run_id", ""),
         }
 
-    # ---- Partial case (agent hit step/token limit) ----
+        # ---- Partial case (agent hit step/token limit) ----
     if status == "partial":
-        # Sometimes partial still has a partial answer (mid-synthesis)
+        # Even if synthesis didn't complete, we have retrieved evidence.
+        # Return the partial answer (if any) PLUS the citations from retrieved chunks.
         partial_answer = result.get("answer") or ""
         if partial_answer:
             answer_text = partial_answer
         else:
+            # No synthesis completed — but we still have retrieved evidence.
+            # Be honest about what happened, but provide the citations so the user
+            # can see what was found.
             answer_text = (
                 "The agent retrieved relevant evidence but couldn't complete synthesis "
-                "within the step limit. Please try again — the agent is non-deterministic "
-                "and may succeed on retry."
+                "within the step limit. The retrieved sources are listed in the citations field. "
+                "Please try rephrasing your question to be more specific, or try again — "
+                "the agent is non-deterministic and may succeed on retry."
             )
+        
+        # CRITICAL: Always extract citations for partial responses.
+        # The agent retrieved chunks — those should be cited even without synthesis.
+        citations = _extract_citations(result)
+        
+        # If no citations extracted from the result, check for retrieved_chunks or evidence
+        if not citations:
+            retrieved = result.get("retrieved_chunks") or result.get("evidence") or []
+            if isinstance(retrieved, list):
+                for chunk in retrieved:
+                    if isinstance(chunk, dict):
+                        source = chunk.get("source") or chunk.get("file") or chunk.get("document") or ""
+                        if source:
+                            source_name = str(source).replace("\\", "/").split("/")[-1]
+                            if source_name and source_name not in citations:
+                                citations.append(source_name)
+                    elif isinstance(chunk, str):
+                        source_name = chunk.replace("\\", "/").split("/")[-1]
+                        if source_name and source_name not in citations:
+                            citations.append(source_name)
+        
         return {
             "answer": answer_text,
-            "citations": _extract_citations(result),
-            "iterations": result.get("steps_taken", 1),
+            "citations": citations,  # NOW we always return citations
+            "iterations": result.get("steps_taken", result.get("agent_steps", 1)),
             "status": "partial",
-            "evidence_count": result.get("evidence_count", 0),
+            "evidence_count": result.get("evidence_count", result.get("retrievals", 0)),
             "cost_tokens": result.get("cost_tokens", 0),
-            "run_id": result.get("run_id", ""),
+            "run_id": result.get("run_id", result.get("req_id", "")),
         }
-
     # ---- Error case (agent crashed) ----
     if status == "failed":
         error_msg = (
