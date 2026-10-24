@@ -2,8 +2,9 @@
 ATLAS API — FastAPI application.
 
 Endpoints:
+    GET  /              — smart root (redirects browsers to /ui, JSON for API clients)
+    GET  /ui            — interactive web UI
     GET  /health        — health check for Render monitoring
-    GET  /              — API info + available endpoints
     POST /chat          — synchronous chat (blocking, with auto-retry)
     GET  /docs          — auto-generated Swagger documentation
 
@@ -21,11 +22,11 @@ Configuration:
 
 Bulletproofing features:
     1. Auto-retry on 'partial' status (up to 2 retries within one request)
-    2. Per-request timeout (returns 504 if agent hangs)
-    3. Comprehensive error handling with diagnostic hints
-    4. Request logging for post-mortem debugging
-    5. Graceful degradation: never returns a 500 without context
-    6. Health check verifies agent is truly ready (not just imported)
+    2. Comprehensive error handling with diagnostic hints
+    3. Request logging for post-mortem debugging
+    4. Graceful degradation: never returns a 500 without context
+    5. Health check verifies agent is truly ready (not just imported)
+    6. Smart root: browsers see the UI, API clients see JSON
 """
 
 from __future__ import annotations
@@ -35,10 +36,12 @@ import os
 import time
 import uuid
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any, Optional
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
@@ -287,7 +290,7 @@ def _extract_response_fields(result: Any) -> dict:
             "run_id": result.get("run_id", ""),
         }
 
-        # ---- Partial case (agent hit step/token limit) ----
+    # ---- Partial case (agent hit step/token limit) ----
     if status == "partial":
         # Even if synthesis didn't complete, we have retrieved evidence.
         # Return the partial answer (if any) PLUS the citations from retrieved chunks.
@@ -304,11 +307,11 @@ def _extract_response_fields(result: Any) -> dict:
                 "Please try rephrasing your question to be more specific, or try again — "
                 "the agent is non-deterministic and may succeed on retry."
             )
-        
+
         # CRITICAL: Always extract citations for partial responses.
         # The agent retrieved chunks — those should be cited even without synthesis.
         citations = _extract_citations(result)
-        
+
         # If no citations extracted from the result, check for retrieved_chunks or evidence
         if not citations:
             retrieved = result.get("retrieved_chunks") or result.get("evidence") or []
@@ -324,7 +327,7 @@ def _extract_response_fields(result: Any) -> dict:
                         source_name = chunk.replace("\\", "/").split("/")[-1]
                         if source_name and source_name not in citations:
                             citations.append(source_name)
-        
+
         return {
             "answer": answer_text,
             "citations": citations,  # NOW we always return citations
@@ -334,6 +337,7 @@ def _extract_response_fields(result: Any) -> dict:
             "cost_tokens": result.get("cost_tokens", 0),
             "run_id": result.get("run_id", result.get("req_id", "")),
         }
+
     # ---- Error case (agent crashed) ----
     if status == "failed":
         error_msg = (
@@ -377,50 +381,8 @@ def _extract_response_fields(result: Any) -> dict:
 
 
 # ===========================================================================
-# Endpoints
+# Request logging middleware
 # ===========================================================================
-
-@app.get("/health")
-async def health_check():
-    """Health check endpoint — Render pings this every 30s.
-
-    Returns 200 if the app is healthy, 503 if something is wrong.
-    Render restarts the container if this fails 3 times in a row.
-    """
-    if _agent is None:
-        raise HTTPException(
-            status_code=503,
-            detail="Agent not initialized. Check startup logs for errors.",
-        )
-
-    uptime = time.time() - START_TIME
-    return {
-        "status": "ok",
-        "uptime_seconds": round(uptime, 1),
-        "agent_ready": _agent is not None,
-        "requests_served": _request_count,
-    }
-
-
-@app.get("/")
-async def root():
-    """API info — shows available endpoints and eval results."""
-    return {
-        "name": "ATLAS RAG Agent",
-        "version": "1.0.0",
-        "description": "Retrieval-augmented generation for equipment specifications",
-        "endpoints": {
-            "health": "GET /health",
-            "chat": "POST /chat",
-            "docs": "GET /docs",
-        },
-        "eval_results": {
-            "success_rate": "83.3%",
-            "grounding_score": 1.0,
-            "citation_quality": 1.0,
-        },
-    }
-
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
@@ -454,6 +416,100 @@ async def log_requests(request: Request, call_next):
             f"[{request_id}] FAILED after {duration_ms}ms: {type(e).__name__}: {e}"
         )
         raise
+
+
+# ===========================================================================
+# Endpoints
+# ===========================================================================
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint — Render pings this every 30s.
+
+    Returns 200 if the app is healthy, 503 if something is wrong.
+    Render restarts the container if this fails 3 times in a row.
+    """
+    if _agent is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Agent not initialized. Check startup logs for errors.",
+        )
+
+    uptime = time.time() - START_TIME
+    return {
+        "status": "ok",
+        "uptime_seconds": round(uptime, 1),
+        "agent_ready": _agent is not None,
+        "requests_served": _request_count,
+    }
+
+
+@app.get("/")
+async def root_with_browser_redirect(request: Request):
+    """Smart root: redirect browsers to /ui, return JSON for API clients.
+
+    Detects the Accept header:
+        - 'text/html' present → browser → redirect to /ui (interactive web UI)
+        - otherwise           → API client (curl, Postman, etc.) → JSON info
+    """
+    accept = request.headers.get("accept", "")
+    if "text/html" in accept:
+        # Browser request → send to UI
+        return RedirectResponse(url="/ui", status_code=302)
+    # API client (curl, Postman, etc.) → return JSON
+    return {
+        "name": "ATLAS RAG Agent",
+        "version": "1.0.0",
+        "description": "Retrieval-augmented generation for equipment specifications",
+        "endpoints": {
+            "ui": "GET /ui (interactive web interface)",
+            "health": "GET /health",
+            "chat": "POST /chat",
+            "sources": "GET /sources/{filename} (source documents)",
+            "docs": "GET /docs",
+        },
+        "eval_results": {
+            "success_rate": "83.3%",
+            "grounding_score": 1.0,
+            "citation_quality": 1.0,
+        },
+    }
+
+
+@app.get("/ui")
+async def ui():
+    """Serve the interactive web UI (single-page HTML)."""
+    ui_path = Path(__file__).parent / "static" / "index.html"
+    if not ui_path.exists():
+        raise HTTPException(status_code=404, detail="UI file not found")
+    return FileResponse(ui_path, media_type="text/html")
+
+
+@app.get("/sources/{filename}")
+async def get_source(filename: str):
+    """Serve a source document from the corpus."""
+    if "/" in filename or "\\" in filename or ".." in filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+
+    corpus_dir = (Path(__file__).resolve().parents[3] / "data" / "corpus").resolve()
+    file_path = (corpus_dir / filename).resolve()
+    try:
+        file_path.relative_to(corpus_dir)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid filename") from None
+
+    if not file_path.is_file():
+        raise HTTPException(status_code=404, detail=f"Source not found: {filename}")
+
+    ext = file_path.suffix.lower()
+    media_types = {
+        ".pdf": "application/pdf",
+        ".txt": "text/plain; charset=utf-8",
+        ".md": "text/markdown; charset=utf-8",
+    }
+    media_type = media_types.get(ext, "application/octet-stream")
+
+    return FileResponse(file_path, media_type=media_type, filename=filename)
 
 
 @app.post("/chat", response_model=ChatResponse)
@@ -493,7 +549,7 @@ async def chat(request: ChatRequest):
 
             # If refused, return immediately — no point retrying
             if last_result["status"] == "refused":
-                logger.info(f"Agent refused the query (no retry needed)")
+                logger.info("Agent refused the query (no retry needed)")
                 break
 
             # If completed successfully, return
@@ -550,6 +606,9 @@ async def chat(request: ChatRequest):
                 continue
             break
 
+    if last_result is None:
+        raise RuntimeError("Agent run completed without producing a result")
+
     latency_ms = int((time.time() - start) * 1000)
 
     return ChatResponse(
@@ -567,27 +626,43 @@ async def chat(request: ChatRequest):
 
 # ===========================================================================
 # Error handlers — graceful responses for common failure modes
+# IMPORTANT: FastAPI exception handlers MUST return a Response object
+# (JSONResponse), not a raw dict. Returning a dict silently fails.
 # ===========================================================================
 
 @app.exception_handler(TimeoutError)
 async def timeout_handler(request: Request, exc: TimeoutError):
-    """Handle agent timeouts gracefully."""
+    """Handle agent timeouts gracefully (returns 504 Gateway Timeout)."""
     logger.error(f"Timeout on {request.url.path}: {exc}")
-    return {
-        "detail": (
-            "The agent took too long to respond. This usually means the "
-            "underlying LLM provider (Groq) is slow or rate-limiting. "
-            "Try again in a few minutes."
-        ),
-        "status": 504,
-    }
+    return JSONResponse(
+        status_code=504,
+        content={
+            "detail": (
+                "The agent took too long to respond. This usually means the "
+                "underlying LLM provider (Groq) is slow or rate-limiting. "
+                "Try again in a few minutes."
+            ),
+            "status": 504,
+        },
+    )
 
 
-@app.exception_handler(500)
-async def internal_error_handler(request: Request, exc: HTTPException):
-    """Catch-all for unexpected errors — never leak stack traces."""
-    logger.error(f"Internal error on {request.url.path}: {exc}", exc_info=True)
-    return {
-        "detail": "An internal error occurred. Check server logs for details.",
-        "status": 500,
-    }
+@app.exception_handler(Exception)
+async def internal_error_handler(request: Request, exc: Exception):
+    """Catch-all for unexpected errors — never leak stack traces to clients.
+
+    Logs the full exception server-side, returns a generic message to the
+    client. Returns 500 Internal Server Error.
+    """
+    logger.error(
+        f"Internal error on {request.url.path}: {type(exc).__name__}: {exc}",
+        exc_info=True,
+    )
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": "An internal error occurred. Check server logs for details.",
+            "error_type": type(exc).__name__,
+            "status": 500,
+        },
+    )

@@ -3,691 +3,1131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ATLAS — Industrial Maintenance Research Assistant</title>
+    <title>ATLAS — Industrial Maintenance RAG Agent</title>
     <style>
-        :root {
-            --primary: #0f172a;
-            --accent: #2b6887;
-            --accent-light: #3b82f6;
-            --accent-glow: rgba(59, 130, 246, 0.15);
-            --text: #1e293b;
-            --text-light: #64748b;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --border: #e2e8f0;
-            --success: #10b981;
-            --success-bg: #ecfdf5;
-            --error: #ef4444;
-            --error-bg: #fef2f2;
-            --warning: #f59e0b;
-            --warning-bg: #fffbeb;
-            --code-bg: #f1f5f9;
-            --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
-            --shadow-lg: 0 10px 25px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.05);
-            --radius: 12px;
-        }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
+        :root {
+            --bg: #0a0e1a;
+            --bg-elevated: #131825;
+            --bg-card: #1a2030;
+            --bg-hover: #1f2638;
+            --border: #2a3142;
+            --border-light: #3a4258;
+            --text: #e8ecf3;
+            --text-muted: #8b94a8;
+            --text-dim: #6b7488;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --accent-light: #818cf8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --refused: #f97316;
+            --planner: #3b82f6;
+            --synthesizer: #8b5cf6;
+            --critic: #ec4899;
+            --retriever: #14b8a6;
+        }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
             background: var(--bg);
             color: var(--text);
-            line-height: 1.6;
             min-height: 100vh;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
         }
+        .container { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
 
-        /* ===== HEADER ===== */
-        .header {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #2b6887 100%);
-            color: white;
-            padding: 2.5rem 1.5rem 2rem;
+        /* ===== Header ===== */
+        header {
             text-align: center;
-            position: relative;
-            overflow: hidden;
+            margin-bottom: 56px;
+            padding: 40px 0 32px;
+            border-bottom: 1px solid var(--border);
         }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-image: 
-                radial-gradient(circle at 20% 50%, rgba(59,130,246,0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 50%, rgba(43,104,135,0.15) 0%, transparent 50%);
-            pointer-events: none;
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
         }
-
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            letter-spacing: -1px;
-            position: relative;
-            background: linear-gradient(to right, #ffffff, #93c5fd);
+        .logo-icon {
+            width: 56px; height: 56px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; font-weight: 800; color: white;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+        }
+        h1 {
+            font-size: 36px; font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff, #a5b4fc);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-
-        .header .tagline {
-            color: #94a3b8;
-            font-size: 0.95rem;
-            margin-top: 0.5rem;
-            position: relative;
+        .tagline {
+            color: var(--text-muted);
+            margin-top: 12px;
+            font-size: 16px;
+            max-width: 720px;
+            margin-left: auto;
+            margin-right: auto;
         }
-
-        .header .badge {
-            display: inline-block;
-            margin-top: 0.75rem;
-            padding: 0.25rem 0.75rem;
-            background: rgba(59,130,246,0.15);
-            border: 1px solid rgba(59,130,246,0.3);
-            border-radius: 20px;
-            font-size: 0.75rem;
-            color: #93c5fd;
-            font-weight: 500;
-            position: relative;
-        }
-
-        /* ===== MAIN CONTAINER ===== */
-        .container {
-            max-width: 760px;
-            margin: -1.5rem auto 2rem;
-            padding: 0 1.5rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* ===== QUERY CARD ===== */
-        .query-card {
-            background: var(--card);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-lg);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .query-card label {
-            display: block;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-light);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.5rem;
-        }
-
-        .query-input-row {
-            display: flex;
-            gap: 0.75rem;
-        }
-
-        .query-input {
-            flex: 1;
-            padding: 0.875rem 1rem;
-            font-size: 1rem;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            outline: none;
-            transition: all 0.2s;
-            background: var(--bg);
-        }
-
-        .query-input:focus {
-            border-color: var(--accent-light);
-            background: var(--card);
-            box-shadow: 0 0 0 4px var(--accent-glow);
-        }
-
-        .ask-btn {
-            padding: 0.875rem 1.75rem;
-            font-size: 1rem;
-            font-weight: 600;
-            background: linear-gradient(135deg, var(--accent), var(--accent-light));
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-
-        .ask-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(59,130,246,0.3);
-        }
-
-        .ask-btn:active { transform: translateY(0); }
-        .ask-btn:disabled {
-            background: #94a3b8;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        /* ===== EXAMPLES ===== */
-        .examples {
-            display: flex;
+        .badges {
+            display: flex; justify-content: center; gap: 8px; margin-top: 20px;
             flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 1rem;
+        }
+        .badge {
+            padding: 5px 14px; border-radius: 999px;
+            font-size: 12px; font-weight: 600;
+            background: var(--bg-card); border: 1px solid var(--border);
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .badge.success { color: var(--success); border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.08); }
+        .badge.accent { color: var(--accent-light); border-color: rgba(99,102,241,0.3); background: rgba(99,102,241,0.08); }
+
+        /* ===== Section ===== */
+        section { margin-bottom: 56px; }
+        .section-title {
+            font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px;
+            color: var(--text-muted); margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .section-title::before {
+            content: ''; width: 3px; height: 14px;
+            background: var(--accent); border-radius: 2px;
         }
 
-        .example-chip {
-            font-size: 0.8rem;
-            padding: 0.35rem 0.8rem;
-            background: var(--code-bg);
-            color: var(--accent);
-            border-radius: 20px;
-            cursor: pointer;
+        /* ===== What is ATLAS ===== */
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        .about-card {
+            background: var(--bg-elevated);
             border: 1px solid var(--border);
-            transition: all 0.15s;
-            font-weight: 500;
+            border-radius: 14px;
+            padding: 28px;
+        }
+        .about-card h3 {
+            font-size: 18px; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .about-card p { color: var(--text-muted); font-size: 14px; line-height: 1.7; }
+        .about-card .icon { font-size: 22px; }
+
+        /* ===== Architecture ===== */
+        .arch-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 32px 16px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+        }
+        .arch-node {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            padding: 14px 18px;
+            text-align: center;
+            min-width: 130px;
+            position: relative;
+        }
+        .arch-node .label {
+            font-size: 11px; text-transform: uppercase;
+            letter-spacing: 0.8px; color: var(--text-dim);
+            margin-bottom: 4px;
+        }
+        .arch-node .name { font-size: 14px; font-weight: 600; }
+        .arch-node.planner { border-color: var(--planner); }
+        .arch-node.planner .name { color: var(--planner); }
+        .arch-node.retriever { border-color: var(--retriever); }
+        .arch-node.retriever .name { color: var(--retriever); }
+        .arch-node.synthesizer { border-color: var(--synthesizer); }
+        .arch-node.synthesizer .name { color: var(--synthesizer); }
+        .arch-node.critic { border-color: var(--critic); }
+        .arch-node.critic .name { color: var(--critic); }
+        .arch-arrow {
+            color: var(--text-dim); font-size: 20px;
+            font-weight: 300;
+        }
+        .arch-loop {
+            width: 100%; text-align: center;
+            margin-top: 12px;
+            font-size: 12px; color: var(--text-dim);
+            font-style: italic;
         }
 
-        .example-chip:hover {
+        /* ===== Corpus Library ===== */
+        .corpus-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .corpus-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+        .corpus-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+        .corpus-card .doc-icon {
+            font-size: 24px; margin-bottom: 10px;
+        }
+        .corpus-card .doc-title {
+            font-size: 14px; font-weight: 600;
+            margin-bottom: 6px; line-height: 1.4;
+        }
+        .corpus-card .doc-meta {
+            font-size: 11px; color: var(--text-dim);
+            margin-bottom: 10px;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+        .corpus-card .doc-desc {
+            font-size: 13px; color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* ===== Suggestions ===== */
+        .suggestions {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 12px;
+        }
+        .suggestion-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .suggestion-card:hover {
+            border-color: var(--accent);
+            background: var(--bg-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
+        }
+        .suggestion-card .category {
+            font-size: 10px; color: var(--accent-light);
+            text-transform: uppercase; letter-spacing: 0.8px;
+            margin-bottom: 6px; font-weight: 700;
+        }
+        .suggestion-card .question { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+        /* ===== Chat Layout ===== */
+        .chat-layout {
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 24px;
+            align-items: start;
+        }
+        @media (max-width: 900px) {
+            .chat-layout { grid-template-columns: 1fr; }
+            .about-grid { grid-template-columns: 1fr; }
+        }
+
+        .chat-main { min-width: 0; }
+
+        .chat-input-wrap {
+            display: flex; gap: 10px; margin-bottom: 20px;
+        }
+        .chat-input {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            color: var(--text);
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .chat-input:focus {
+            outline: none; border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        .chat-input::placeholder { color: var(--text-dim); }
+        .send-btn {
             background: var(--accent);
-            color: white;
+            color: white; border: none;
+            padding: 16px 28px;
+            border-radius: 12px;
+            font-size: 15px; font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .send-btn:hover:not(:disabled) {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+        .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .stop-btn {
+            background: var(--danger);
+            color: white; border: none;
+            padding: 16px 28px;
+            border-radius: 12px;
+            font-size: 15px; font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            display: none;
+            align-items: center; gap: 8px;
+        }
+        .stop-btn.visible { display: inline-flex; }
+        .stop-btn:hover { background: #dc2626; }
+
+        /* ===== Loading state ===== */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 20px;
+        }
+        .loading.visible { display: block; }
+        .dots { display: inline-flex; gap: 6px; margin-bottom: 16px; }
+        .dot {
+            width: 10px; height: 10px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        .loading-stages {
+            margin-top: 16px;
+            font-size: 13px;
+            color: var(--text-dim);
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+        .loading-stages .stage {
+            opacity: 0.4;
+            margin: 4px 0;
+            transition: opacity 0.3s;
+        }
+        .loading-stages .stage.active { opacity: 1; color: var(--accent-light); }
+
+        /* ===== Response card ===== */
+        .response-card {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 28px;
+            display: none;
+        }
+        .response-card.visible { display: block; }
+        .response-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .status-pill {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 5px 14px; border-radius: 999px;
+            font-size: 12px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .status-pill.completed { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        .status-pill.refused { background: rgba(249, 115, 22, 0.15); color: var(--refused); }
+        .status-pill.partial { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+        .status-pill.failed { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+        .run-id {
+            font-size: 11px; color: var(--text-dim);
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+        .answer-text {
+            font-size: 15px; line-height: 1.8;
+            margin-bottom: 24px;
+            white-space: pre-wrap;
+        }
+        .citations-section { margin-bottom: 24px; }
+        .citations-label {
+            font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
+            color: var(--text-muted); margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .citations { display: flex; flex-wrap: wrap; gap: 8px; }
+        .citation-chip {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: #a5b4fc;
+            padding: 7px 13px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: 'SF Mono', Monaco, monospace;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .citation-chip:hover {
+            background: rgba(99, 102, 241, 0.2);
             border-color: var(--accent);
             transform: translateY(-1px);
         }
 
-        /* ===== STATUS BAR ===== */
-        .status-bar {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            background: var(--card);
+        /* ===== Metrics grid ===== */
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+        .metric {
+            background: var(--bg-card);
+            padding: 12px 14px;
             border-radius: 8px;
-            margin-bottom: 1rem;
-            min-height: 48px;
-            box-shadow: var(--shadow);
             border: 1px solid var(--border);
         }
+        .metric-label {
+            font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+            color: var(--text-dim); margin-bottom: 4px; font-weight: 600;
+        }
+        .metric-value {
+            font-size: 17px; font-weight: 700;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+        .metric-value.cost { color: var(--success); }
+        .metric-value.tokens { color: var(--accent-light); }
+        .metric-value.latency { color: var(--warning); }
 
-        .status-bar.hidden { display: none; }
-
-        .spinner {
-            width: 16px;
-            height: 16px;
-            border: 2.5px solid var(--border);
-            border-top-color: var(--accent-light);
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-            flex-shrink: 0;
+        /* ===== Sidebar ===== */
+        .sidebar {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            position: sticky;
+            top: 24px;
+        }
+        .sidebar h4 {
+            font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
+            color: var(--text-muted); margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .sidebar h4::before {
+            content: ''; width: 3px; height: 12px;
+            background: var(--accent); border-radius: 2px;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .status-text {
-            font-size: 0.9rem;
-            color: var(--text-light);
-            font-weight: 500;
+        .session-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 24px;
         }
-
-        .status-progress {
-            margin-left: auto;
-            display: flex;
-            gap: 4px;
-        }
-
-        .progress-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--border);
-            transition: all 0.3s;
-        }
-
-        .progress-dot.active {
-            background: var(--accent-light);
-            box-shadow: 0 0 8px var(--accent-glow);
-        }
-
-        .progress-dot.done {
-            background: var(--success);
-        }
-
-        /* ===== ANSWER CARD ===== */
-        .answer-card {
-            background: var(--card);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-lg);
-            overflow: hidden;
-            display: none;
-        }
-
-        .answer-card.visible { display: block; }
-
-        .answer-header {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .answer-header.success { background: var(--success-bg); }
-        .answer-header.refused { background: var(--warning-bg); }
-        .answer-header.error { background: var(--error-bg); }
-
-        .status-icon {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .status-icon.success { background: var(--success); color: white; }
-        .status-icon.refused { background: var(--warning); color: white; }
-        .status-icon.error { background: var(--error); color: white; }
-
-        .answer-title {
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .answer-body {
-            padding: 1.5rem;
-        }
-
-        .answer-text {
-            white-space: pre-wrap;
-            line-height: 1.8;
-            font-size: 0.95rem;
-        }
-
-        .answer-text strong {
-            color: var(--accent);
-            background: var(--accent-glow);
-            padding: 0.1rem 0.3rem;
-            border-radius: 3px;
-        }
-
-        /* ===== CITATIONS ===== */
-        .citations-section {
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border);
-        }
-
-        .citations-title {
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-light);
-            margin-bottom: 0.75rem;
-        }
-
-        .citation-card {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            background: var(--code-bg);
+        .stat-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: 8px;
-            margin-bottom: 0.5rem;
-            border-left: 3px solid var(--accent);
-            transition: all 0.15s;
-        }
-
-        .citation-card:hover {
-            background: var(--accent-glow);
-            transform: translateX(2px);
-        }
-
-        .citation-id {
-            font-family: 'Courier New', monospace;
-            font-weight: 700;
-            color: var(--accent);
-            font-size: 0.85rem;
-            min-width: 30px;
-        }
-
-        .citation-source {
-            font-size: 0.85rem;
-            color: var(--text);
-        }
-
-        .citation-source .page {
-            color: var(--text-light);
-            font-size: 0.8rem;
-        }
-
-        /* ===== META BAR ===== */
-        .meta-bar {
-            display: flex;
-            gap: 0;
-            padding: 1rem 1.5rem;
-            background: var(--bg);
-            border-top: 1px solid var(--border);
-        }
-
-        .meta-item {
-            flex: 1;
+            padding: 12px;
             text-align: center;
-            border-right: 1px solid var(--border);
         }
-
-        .meta-item:last-child { border-right: none; }
-
-        .meta-value {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--accent);
+        .stat-box .stat-value {
+            font-size: 20px; font-weight: 700;
+            font-family: 'SF Mono', Monaco, monospace;
+            color: var(--accent-light);
         }
-
-        .meta-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
+        .stat-box .stat-label {
+            font-size: 10px; text-transform: uppercase;
             letter-spacing: 0.5px;
-            color: var(--text-light);
-            margin-top: 0.15rem;
+            color: var(--text-dim);
+            margin-top: 2px;
         }
 
-        /* ===== EMPTY STATE ===== */
+        .history-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .history-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+        .history-item:hover {
+            border-color: var(--accent);
+            background: var(--bg-hover);
+        }
+        .history-item .h-query {
+            color: var(--text);
+            line-height: 1.4;
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .history-item .h-meta {
+            font-size: 10px;
+            color: var(--text-dim);
+            font-family: 'SF Mono', Monaco, monospace;
+            display: flex; gap: 8px;
+        }
+        .history-item .h-status {
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+        .h-status.completed { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        .h-status.refused { background: rgba(249, 115, 22, 0.15); color: var(--refused); }
+        .h-status.partial { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+        .h-status.failed { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+        .history-empty {
+            color: var(--text-dim);
+            font-size: 13px;
+            text-align: center;
+            padding: 24px 12px;
+            font-style: italic;
+        }
+        .clear-history {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 8px;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .clear-history:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        /* ===== Empty state ===== */
         .empty-state {
             text-align: center;
-            padding: 3rem 1.5rem;
-            color: var(--text-light);
+            padding: 48px 20px;
+            color: var(--text-dim);
+            background: var(--bg-elevated);
+            border: 1px dashed var(--border);
+            border-radius: 14px;
         }
+        .empty-state-icon { font-size: 42px; margin-bottom: 14px; opacity: 0.5; }
 
-        .empty-state svg {
-            width: 48px;
-            height: 48px;
-            margin-bottom: 1rem;
-            opacity: 0.3;
+        footer {
+            text-align: center;
+            padding: 32px 0;
+            margin-top: 64px;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 13px;
         }
+        footer a { color: var(--accent-light); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
 
-        .empty-state p {
-            font-size: 0.95rem;
-        }
+        /* ===== Scrollbar ===== */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 640px) {
-            .header h1 { font-size: 1.75rem; }
-            .query-input-row { flex-direction: column; }
-            .ask-btn { width: 100%; }
-            .meta-bar { flex-wrap: wrap; }
-            .meta-item { flex: 50%; border-bottom: 1px solid var(--border); }
+            h1 { font-size: 26px; }
+            .chat-input-wrap { flex-direction: column; }
+            .send-btn, .stop-btn { width: 100%; justify-content: center; }
+            .response-card, .about-card { padding: 20px; }
+            .arch-flow { padding: 20px 8px; }
+            .arch-node { min-width: 100px; padding: 10px 12px; }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>ATLAS</h1>
-        <p class="tagline">Evidence-Grounded Industrial Maintenance Research Assistant</p>
-        <span class="badge">Powered by Groq &middot; RAG &middot; Cited Answers</span>
-    </div>
-
     <div class="container">
-        <div class="query-card">
-            <label>Research Query</label>
-            <div class="query-input-row">
-                <input type="text" class="query-input" id="query"
-                       placeholder="Ask about equipment specs, maintenance procedures, or safety protocols..."
-                       autocomplete="off" onkeypress="handleKeypress(event)">
-                <button class="ask-btn" id="askBtn" onclick="ask()">Ask ATLAS</button>
+        <!-- ============ HEADER ============ -->
+        <header>
+            <div class="logo">
+                <div class="logo-icon">A</div>
+                <h1>ATLAS</h1>
             </div>
-            <div class="examples">
-                <span class="example-chip" onclick="fillExample('What is the maximum operating pressure of the Atlas-3 pump?')">Atlas-3 Pressure</span>
-                <span class="example-chip" onclick="fillExample('What lubricant is specified for the Atlas-3 pump bearings?')">Atlas-3 Lubricant</span>
-                <span class="example-chip" onclick="fillExample('Compare the inspection intervals for Atlas-3 and Atlas-5 pumps.')">Compare Pumps</span>
-                <span class="example-chip" onclick="fillExample('What are the lockout-tagout steps before maintenance?')">Lockout-Tagout</span>
-                <span class="example-chip" onclick="fillExample('How do I bake sourdough bread?')">Off-Topic Test</span>
+            <div class="tagline">
+                A retrieval-augmented generation agent for industrial maintenance documentation.
+                Built on a planner → retriever → synthesizer → critic architecture that
+                verifies every claim against source evidence before returning an answer.
             </div>
-        </div>
+            <div class="badges">
+                <span class="badge">FastAPI</span>
+                <span class="badge">Groq LLM</span>
+                <span class="badge">Jina Embeddings</span>
+                <span class="badge accent">2,067 chunks</span>
+                <span class="badge success">83.3% Eval Pass</span>
+                <span class="badge success">100% Grounding</span>
+            </div>
+        </header>
 
-        <div class="status-bar hidden" id="statusBar">
-            <div class="spinner" id="spinner"></div>
-            <span class="status-text" id="statusText">Initializing...</span>
-            <div class="status-progress" id="progressDots">
-                <div class="progress-dot" id="dot1"></div>
-                <div class="progress-dot" id="dot2"></div>
-                <div class="progress-dot" id="dot3"></div>
-            </div>
-        </div>
-
-        <div class="answer-card" id="answerCard">
-            <div class="answer-header" id="answerHeader">
-                <div class="status-icon" id="statusIcon"></div>
-                <span class="answer-title" id="answerTitle"></span>
-            </div>
-            <div class="answer-body">
-                <div class="answer-text" id="answerText"></div>
-                <div class="citations-section" id="citationsSection" style="display:none;">
-                    <div class="citations-title">Sources &amp; Evidence</div>
-                    <div id="citationList"></div>
+        <!-- ============ WHAT IS ATLAS ============ -->
+        <section>
+            <div class="section-title">What is ATLAS?</div>
+            <div class="about-grid">
+                <div class="about-card">
+                    <h3><span class="icon">🧠</span> Three-Component Agent</h3>
+                    <p>
+                        Unlike standard RAG demos that retrieve chunks and generate answers,
+                        ATLAS uses a <strong>critic component</strong> that checks every claim
+                        against retrieved evidence. If the critic finds unsupported claims,
+                        the agent loops back and re-synthesizes — preventing hallucinations
+                        before they reach the user.
+                    </p>
+                </div>
+                <div class="about-card">
+                    <h3><span class="icon">📚</span> Industrial Maintenance Corpus</h3>
+                    <p>
+                        The knowledge base contains four professional references covering
+                        equipment maintenance, OSHA machine guarding, EN 13306 maintenance
+                        standards, and reliability-centered maintenance programs.
+                        Documents are chunked and embedded with Jina v3 for semantic retrieval.
+                    </p>
                 </div>
             </div>
-            <div class="meta-bar" id="metaBar"></div>
-        </div>
+        </section>
 
-        <div class="empty-state" id="emptyState">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
-            <p>Ask a question about industrial maintenance to get started.</p>
-        </div>
+        <!-- ============ ARCHITECTURE ============ -->
+        <section>
+            <div class="section-title">Agent Architecture</div>
+            <div class="arch-flow">
+                <div class="arch-node planner">
+                    <div class="label">Step 1</div>
+                    <div class="name">Planner</div>
+                    <div style="font-size: 10px; color: var(--text-dim); margin-top: 4px;">gpt-oss-20b</div>
+                </div>
+                <div class="arch-arrow">→</div>
+                <div class="arch-node retriever">
+                    <div class="label">Step 2</div>
+                    <div class="name">Retriever</div>
+                    <div style="font-size: 10px; color: var(--text-dim); margin-top: 4px;">cosine sim</div>
+                </div>
+                <div class="arch-arrow">→</div>
+                <div class="arch-node synthesizer">
+                    <div class="label">Step 3</div>
+                    <div class="name">Synthesizer</div>
+                    <div style="font-size: 10px; color: var(--text-dim); margin-top: 4px;">gpt-oss-120b</div>
+                </div>
+                <div class="arch-arrow">→</div>
+                <div class="arch-node critic">
+                    <div class="label">Step 4</div>
+                    <div class="name">Critic</div>
+                    <div style="font-size: 10px; color: var(--text-dim); margin-top: 4px;">gpt-oss-20b</div>
+                </div>
+                <div class="arch-loop">
+                    ↻ If critic rejects → loop back to planner (max 3 iterations)
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ CORPUS LIBRARY ============ -->
+        <section>
+            <div class="section-title">Knowledge Base (4 Documents, 2,067 Chunks)</div>
+            <div class="corpus-grid">
+                <div class="corpus-card">
+                    <div class="doc-icon">📘</div>
+                    <div class="doc-title">V-TECS Industrial Maintenance Guide for Mechanic</div>
+                    <div class="doc-meta">592 pages · 1986 · South Carolina Dept. of Education</div>
+                    <div class="doc-desc">
+                        Comprehensive task-based guide covering belt drives, chain & sprocket
+                        drives, gear drives, flexible couplings, bearings, hydraulic systems,
+                        boilers, cranes, elevators, welding, carpentry, drill press, grinding,
+                        milling, turning, and inspection procedures.
+                    </div>
+                </div>
+                <div class="corpus-card">
+                    <div class="doc-icon">🛡️</div>
+                    <div class="doc-title">Machine Guarding Checklist (OSHA 3067)</div>
+                    <div class="doc-meta">2 pages · NJ State AFL-CIO · OSHA grant SH-31243-SH7</div>
+                    <div class="doc-desc">
+                        39-point OSHA compliance checklist covering safeguard requirements,
+                        point-of-operation hazards, power transmission apparatus, electric
+                        hazards, training, PPE, and lockout/tagout procedures (29 CFR 1910.147).
+                    </div>
+                </div>
+                <div class="corpus-card">
+                    <div class="doc-icon">📋</div>
+                    <div class="doc-title">MaintMaster Maintenance Manual 2024</div>
+                    <div class="doc-meta">87 pages · 2024 · MaintMaster Systems</div>
+                    <div class="doc-desc">
+                        European-standard (EN 13306) maintenance reference covering the
+                        maintenance pyramid, vision/strategy/policy, preventive/corrective/
+                        improvement maintenance, KPIs (MTTR, MOTBF, MWT), planning,
+                        spare parts management, LEAN/5S, and systematic work environment.
+                    </div>
+                </div>
+                <div class="corpus-card">
+                    <div class="doc-icon">⚙️</div>
+                    <div class="doc-title">Types of Maintenance Programs (O&M Guide)</div>
+                    <div class="doc-meta">9 pages · Release 3.0 · U.S. DOE Federal Energy Mgmt</div>
+                    <div class="doc-desc">
+                        Comparison of four maintenance philosophies: reactive ($18/hp/yr),
+                        preventive ($13/hp/yr), predictive ($9/hp/yr), and reliability-centered
+                        ($6/hp/yr). Covers the bathtub curve, failure modes, and RCM
+                        implementation steps from NASA 2000.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ SUGGESTED QUESTIONS ============ -->
+        <section>
+            <div class="section-title">Try One of These Queries</div>
+            <div class="suggestions" id="suggestions"></div>
+        </section>
+
+        <!-- ============ CHAT ============ -->
+        <section>
+            <div class="section-title">Ask the Agent</div>
+            <div class="chat-layout">
+                <div class="chat-main">
+                    <div class="chat-input-wrap">
+                        <input
+                            type="text"
+                            class="chat-input"
+                            id="queryInput"
+                            placeholder="e.g., What is the difference between preventive and predictive maintenance?"
+                            autocomplete="off"
+                        />
+                        <button class="send-btn" id="sendBtn">
+                            <span>Send</span>
+                            <span style="font-size: 12px; opacity: 0.7;">↵</span>
+                        </button>
+                        <button class="stop-btn" id="stopBtn">
+                            <span>Stop</span>
+                            <span style="font-size: 12px;">■</span>
+                        </button>
+                    </div>
+
+                    <div class="loading" id="loading">
+                        <div class="dots">
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                        <div>Agent is working — retrieving evidence and synthesizing an answer...</div>
+                        <div class="loading-stages">
+                            <div class="stage" id="stage1">▸ Planner deciding: retrieve vs answer vs refuse</div>
+                            <div class="stage" id="stage2">▸ Retriever pulling relevant chunks from vector store</div>
+                            <div class="stage" id="stage3">▸ Synthesizer writing grounded answer with citations</div>
+                            <div class="stage" id="stage4">▸ Critic verifying every claim against evidence</div>
+                        </div>
+                        <div style="font-size: 11px; margin-top: 16px; color: var(--text-dim);">
+                            First request after sleep takes ~30–60s (Render free tier cold start)
+                        </div>
+                    </div>
+
+                    <div class="response-card" id="responseCard">
+                        <div class="response-header">
+                            <div class="status-pill" id="statusPill">—</div>
+                            <div class="run-id" id="runId"></div>
+                        </div>
+                        <div class="answer-text" id="answerText"></div>
+                        <div class="citations-section" id="citationsSection">
+                            <div class="citations-label">📎 Sources</div>
+                            <div class="citations" id="citations"></div>
+                        </div>
+                        <div class="metrics">
+                            <div class="metric">
+                                <div class="metric-label">Tokens</div>
+                                <div class="metric-value tokens" id="metricTokens">—</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-label">Est. Cost</div>
+                                <div class="metric-value cost" id="metricCost">—</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-label">Latency</div>
+                                <div class="metric-value latency" id="metricLatency">—</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-label">Steps</div>
+                                <div class="metric-value" id="metricSteps">—</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-label">Evidence</div>
+                                <div class="metric-value" id="metricEvidence">—</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-label">Attempts</div>
+                                <div class="metric-value" id="metricAttempts">—</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="empty-state" id="emptyState">
+                        <div class="empty-state-icon">💬</div>
+                        <div>Ask a question above to see the agent's response with citations and metrics.</div>
+                    </div>
+                </div>
+
+                <!-- ===== Sidebar ===== -->
+                <div class="sidebar">
+                    <h4>Session Stats</h4>
+                    <div class="session-stats">
+                        <div class="stat-box">
+                            <div class="stat-value" id="statQueries">0</div>
+                            <div class="stat-label">Queries</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="statTokens">0</div>
+                            <div class="stat-label">Tokens</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="statCost">$0</div>
+                            <div class="stat-label">Cost</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="statSuccess">0%</div>
+                            <div class="stat-label">Success</div>
+                        </div>
+                    </div>
+
+                    <h4>Recent Queries</h4>
+                    <div class="history-list" id="historyList">
+                        <div class="history-empty">No queries yet. Ask your first question!</div>
+                    </div>
+                    <button class="clear-history" id="clearHistory" style="display: none;">
+                        Clear History
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            ATLAS RAG Agent · Deployed on Render ·
+            <a href="/docs" target="_blank">API Docs</a> ·
+            <a href="/health" target="_blank">Health</a> ·
+            Built with FastAPI + Groq + Jina AI
+        </footer>
     </div>
 
     <script>
-        const queryInput = document.getElementById('query');
-        const askBtn = document.getElementById('askBtn');
-        const statusBar = document.getElementById('statusBar');
-        const statusText = document.getElementById('statusText');
-        const answerCard = document.getElementById('answerCard');
-        const answerHeader = document.getElementById('answerHeader');
-        const statusIcon = document.getElementById('statusIcon');
-        const answerTitle = document.getElementById('answerTitle');
-        const answerText = document.getElementById('answerText');
-        const citationsSection = document.getElementById('citationsSection');
-        const citationList = document.getElementById('citationList');
-        const metaBar = document.getElementById('metaBar');
-        const emptyState = document.getElementById('emptyState');
-        const dots = [
-            document.getElementById('dot1'),
-            document.getElementById('dot2'),
-            document.getElementById('dot3')
+        // ============ SUGGESTIONS (organized by source corpus) ============
+        const SUGGESTIONS = [
+            { category: "Maintenance Strategy", question: "What is the difference between preventive and predictive maintenance?" },
+            { category: "Maintenance Strategy", question: "What is reliability-centered maintenance (RCM) and when should it be used?" },
+            { category: "Maintenance Strategy", question: "What is the bathtub curve and what does it tell us about equipment failure?" },
+            { category: "Standards (EN 13306)", question: "What does the EN 13306 standard define for maintenance terminology?" },
+            { category: "Standards (EN 13306)", question: "What is the difference between corrective, preventive, and improvement maintenance?" },
+            { category: "KPIs", question: "What is MTTR and how is it calculated?" },
+            { category: "KPIs", question: "What is MOTBF and how does it differ from MTBF?" },
+            { category: "KPIs", question: "What are the three categories of maintenance KPIs in EN 15341?" },
+            { category: "Machine Guarding", question: "What are the OSHA requirements for machine safeguarding at the point of operation?" },
+            { category: "Machine Guarding", question: "What is lockout/tagout and when is it required?" },
+            { category: "Industrial Tasks", question: "How do I align and tension a belt drive?" },
+            { category: "Industrial Tasks", question: "How do I install and align a flexible coupling?" },
+            { category: "Industrial Tasks", question: "How do I replace a mechanical seal on a pump?" },
+            { category: "Industrial Tasks", question: "What is the proper procedure for installing pillow block bearings?" },
+            { category: "Hydraulics", question: "How do I adjust hydraulic pressure in a hydraulic system?" },
+            { category: "Hydraulics", question: "What is cavitation in a hydraulic pump and what causes it?" },
+            { category: "Spares Management", question: "What are the three classes of spare parts in maintenance inventory?" },
+            { category: "Autonomous Maint.", question: "What is autonomous maintenance and what is the operator's role?" },
         ];
 
-        function fillExample(text) {
-            queryInput.value = text;
-            queryInput.focus();
+        // ============ Constants ============
+        const API_URL = window.location.origin + '/chat';
+        const COST_PER_MILLION_TOKENS = 0.30; // blended Groq pricing
+
+        // ============ State ============
+        let currentController = null;
+        let stageInterval = null;
+
+        // ============ Render suggestions ============
+        const suggestionsEl = document.getElementById('suggestions');
+        SUGGESTIONS.forEach(s => {
+            const card = document.createElement('div');
+            card.className = 'suggestion-card';
+            card.innerHTML = `
+                <div class="category">${s.category}</div>
+                <div class="question">${s.question}</div>
+            `;
+            card.addEventListener('click', () => {
+                document.getElementById('queryInput').value = s.question;
+                sendQuery();
+            });
+            suggestionsEl.appendChild(card);
+        });
+
+        // ============ Helpers ============
+        function formatCost(tokens) {
+            const cost = (tokens / 1_000_000) * COST_PER_MILLION_TOKENS;
+            if (cost < 0.01) return '$' + cost.toFixed(4);
+            return '$' + cost.toFixed(3);
+        }
+        function formatLatency(ms) {
+            if (ms < 1000) return ms + 'ms';
+            return (ms / 1000).toFixed(1) + 's';
+        }
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
-        function handleKeypress(e) {
-            if (e.key === 'Enter') ask();
+        // ============ Session Stats (localStorage) ============
+        function loadStats() {
+            try {
+                return JSON.parse(localStorage.getItem('atlas_stats') || '{"queries":0,"tokens":0,"cost":0,"success":0}');
+            } catch { return { queries: 0, tokens: 0, cost: 0, success: 0 }; }
+        }
+        function saveStats(stats) {
+            localStorage.setItem('atlas_stats', JSON.stringify(stats));
+        }
+        function updateStats(response) {
+            const stats = loadStats();
+            stats.queries++;
+            stats.tokens += response.cost_tokens || 0;
+            stats.cost += (response.cost_tokens || 0) / 1_000_000 * COST_PER_MILLION_TOKENS;
+            if (response.status === 'completed') stats.success++;
+            saveStats(stats);
+            renderStats();
+        }
+        function renderStats() {
+            const stats = loadStats();
+            document.getElementById('statQueries').textContent = stats.queries;
+            document.getElementById('statTokens').textContent = stats.tokens.toLocaleString();
+            document.getElementById('statCost').textContent = '$' + stats.cost.toFixed(3);
+            const successRate = stats.queries > 0
+                ? Math.round((stats.success / stats.queries) * 100) + '%'
+                : '0%';
+            document.getElementById('statSuccess').textContent = successRate;
         }
 
-        function showStatus(msg, activeDot = -1) {
-            statusBar.classList.remove('hidden');
-            statusText.textContent = msg;
-            dots.forEach((dot, i) => {
-                dot.classList.remove('active', 'done');
-                if (i < activeDot) dot.classList.add('done');
-                if (i === activeDot) dot.classList.add('active');
+        // ============ Chat History (localStorage) ============
+        function loadHistory() {
+            try {
+                return JSON.parse(localStorage.getItem('atlas_history') || '[]');
+            } catch { return []; }
+        }
+        function saveHistory(history) {
+            // keep only last 15
+            if (history.length > 15) history = history.slice(0, 15);
+            localStorage.setItem('atlas_history', JSON.stringify(history));
+        }
+        function addToHistory(query, response) {
+            const history = loadHistory();
+            history.unshift({
+                query: query,
+                status: response.status,
+                tokens: response.cost_tokens || 0,
+                latency: response.latency_ms || 0,
+                timestamp: Date.now()
+            });
+            saveHistory(history);
+            renderHistory();
+        }
+        function renderHistory() {
+            const history = loadHistory();
+            const listEl = document.getElementById('historyList');
+            const clearBtn = document.getElementById('clearHistory');
+
+            if (history.length === 0) {
+                listEl.innerHTML = '<div class="history-empty">No queries yet. Ask your first question!</div>';
+                clearBtn.style.display = 'none';
+                return;
+            }
+            clearBtn.style.display = 'block';
+            listEl.innerHTML = '';
+            history.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'history-item';
+                const timeStr = new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                el.innerHTML = `
+                    <div class="h-query">${escapeHtml(item.query)}</div>
+                    <div class="h-meta">
+                        <span class="h-status ${item.status}">${item.status}</span>
+                        <span>${item.tokens.toLocaleString()} tok</span>
+                        <span>${timeStr}</span>
+                    </div>
+                `;
+                el.addEventListener('click', () => {
+                    document.getElementById('queryInput').value = item.query;
+                    sendQuery();
+                });
+                listEl.appendChild(el);
             });
         }
-
-        function hideStatus() {
-            statusBar.classList.add('hidden');
-        }
-
-        function hideEmpty() {
-            emptyState.style.display = 'none';
-        }
-
-        function showCard() {
-            answerCard.classList.add('visible');
-        }
-
-        function setHeader(type, title) {
-            answerHeader.className = 'answer-header ' + type;
-            statusIcon.className = 'status-icon ' + type;
-            const icons = { success: '\u2713', refused: '!', error: '\u00d7' };
-            statusIcon.textContent = icons[type] || '';
-            answerTitle.textContent = title;
-        }
-
-        function showAnswer(result) {
-            answerText.innerHTML = formatAnswer(result.answer || '');
-            answerText.style.color = '';
-
-            if (result.citations && result.citations.length > 0) {
-                citationList.innerHTML = result.citations.map(c =>
-                    `<div class="citation-card">
-                        <span class="citation-id">[${c.evidence_id}]</span>
-                        <span class="citation-source">${c.source}${c.page ? ' <span class="page">p.' + c.page + '</span>' : ''}</span>
-                    </div>`
-                ).join('');
-                citationsSection.style.display = 'block';
-            } else {
-                citationsSection.style.display = 'none';
+        document.getElementById('clearHistory').addEventListener('click', () => {
+            if (confirm('Clear all query history and session stats?')) {
+                localStorage.removeItem('atlas_history');
+                localStorage.removeItem('atlas_stats');
+                renderHistory();
+                renderStats();
             }
+        });
 
-            metaBar.innerHTML = `
-                <div class="meta-item">
-                    <div class="meta-value">${result.steps_taken || 0}</div>
-                    <div class="meta-label">Steps</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-value">${result.evidence_count || 0}</div>
-                    <div class="meta-label">Evidence</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-value">${result.cost_tokens || 0}</div>
-                    <div class="meta-label">Tokens</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-value" style="font-size:0.8rem;word-break:break-all;">${(result.run_id || '').slice(0, 8)}</div>
-                    <div class="meta-label">Run ID</div>
-                </div>
-            `;
-
-            setHeader('success', 'Answer');
-            showCard();
+        // ============ Loading stage animation ============
+        function startStageAnimation() {
+            const stages = ['stage1', 'stage2', 'stage3', 'stage4'];
+            let idx = 0;
+            stages.forEach(id => document.getElementById(id).classList.remove('active'));
+            document.getElementById('stage1').classList.add('active');
+            stageInterval = setInterval(() => {
+                idx = (idx + 1) % stages.length;
+                stages.forEach((id, i) => {
+                    document.getElementById(id).classList.toggle('active', i <= idx);
+                });
+            }, 3500);
+        }
+        function stopStageAnimation() {
+            if (stageInterval) {
+                clearInterval(stageInterval);
+                stageInterval = null;
+            }
         }
 
-        function showRefusal(result) {
-            answerText.innerHTML = result.reason || 'No reason provided';
-            answerText.style.color = 'var(--warning)';
-            citationsSection.style.display = 'none';
-            metaBar.innerHTML = `
-                <div class="meta-item">
-                    <div class="meta-value">${result.steps_taken || 0}</div>
-                    <div class="meta-label">Steps</div>
-                </div>
-            `;
-            setHeader('refused', 'Query Refused');
-            showCard();
-        }
-
-        function showError(message) {
-            answerText.innerHTML = message;
-            answerText.style.color = 'var(--error)';
-            citationsSection.style.display = 'none';
-            metaBar.innerHTML = '';
-            setHeader('error', 'Error');
-            showCard();
-        }
-
-        function formatAnswer(text) {
-            return text.replace(/\[(e\d+)\]/g, '<strong>[$1]</strong>');
-        }
-
-        async function ask() {
-            const query = queryInput.value.trim();
+        // ============ Send / Stop ============
+        async function sendQuery() {
+            const input = document.getElementById('queryInput');
+            const query = input.value.trim();
             if (!query) return;
 
-            askBtn.disabled = true;
-            answerCard.classList.remove('visible');
-            hideEmpty();
-            showStatus('Initializing agent...', 0);
+            // Show loading + stop button, hide previous response
+            document.getElementById('loading').classList.add('visible');
+            document.getElementById('responseCard').classList.remove('visible');
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('sendBtn').style.display = 'none';
+            document.getElementById('stopBtn').classList.add('visible');
+            document.getElementById('sendBtn').disabled = true;
+
+            startStageAnimation();
+
+            // Create AbortController for stop functionality
+            currentController = new AbortController();
 
             try {
-                const response = await fetch('/stream', {
+                const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ query: query }),
+                    signal: currentController.signal
                 });
 
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
 
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-                let buffer = '';
+                // Hide loading
+                document.getElementById('loading').classList.remove('visible');
+                stopStageAnimation();
 
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
+                // Populate response card
+                const statusEl = document.getElementById('statusPill');
+                statusEl.textContent = data.status;
+                statusEl.className = 'status-pill ' + data.status;
 
-                    buffer += decoder.decode(value, { stream: true });
-                    const lines = buffer.split('\n');
-                    buffer = lines.pop();
+                document.getElementById('runId').textContent = data.run_id ? 'run: ' + data.run_id.substring(0, 8) : '';
+                document.getElementById('answerText').textContent = data.answer;
 
-                    for (const line of lines) {
-                        if (!line.startsWith('data: ')) continue;
-                        try {
-                            handleEvent(JSON.parse(line.slice(6)));
-                        } catch (e) {}
-                    }
+                // Citations
+                const citationsEl = document.getElementById('citations');
+                citationsEl.innerHTML = '';
+                const citationsSection = document.getElementById('citationsSection');
+                if (data.citations && data.citations.length > 0) {
+                    data.citations.forEach(c => {
+                        const chip = document.createElement('a');
+                        chip.className = 'citation-chip';
+                        chip.textContent = '📄 ' + c;
+                        // Link directly to the source document — opens in new tab.
+                        // The /sources/{filename} endpoint serves the file from data/corpus/.
+                        chip.href = window.location.origin + '/sources/' + encodeURIComponent(c);
+                        chip.target = '_blank';
+                        chip.rel = 'noopener noreferrer';
+                        chip.title = 'Click to open source document: ' + c;
+                        citationsEl.appendChild(chip);
+                    });
+                    citationsSection.style.display = 'block';
+                } else {
+                    citationsSection.style.display = 'none';
                 }
 
-                hideStatus();
-            } catch (error) {
-                hideStatus();
-                showError(error.message);
+                // Metrics
+                document.getElementById('metricTokens').textContent = (data.cost_tokens || 0).toLocaleString();
+                document.getElementById('metricCost').textContent = formatCost(data.cost_tokens || 0);
+                document.getElementById('metricLatency').textContent = formatLatency(data.latency_ms || 0);
+                document.getElementById('metricSteps').textContent = data.iterations || 0;
+                document.getElementById('metricEvidence').textContent = data.evidence_count || 0;
+                document.getElementById('metricAttempts').textContent = data.attempts || 1;
+
+                // Show card + update history + stats
+                document.getElementById('responseCard').classList.add('visible');
+                addToHistory(query, data);
+                updateStats(data);
+
+            } catch (err) {
+                stopStageAnimation();
+                document.getElementById('loading').classList.remove('visible');
+
+                if (err.name === 'AbortError') {
+                    // User clicked Stop — show partial state, don't update history
+                    document.getElementById('answerText').textContent =
+                        'Query stopped by user. The agent was interrupted mid-execution.';
+                    const statusEl = document.getElementById('statusPill');
+                    statusEl.textContent = 'stopped';
+                    statusEl.className = 'status-pill failed';
+                    document.getElementById('responseCard').classList.add('visible');
+                } else {
+                    document.getElementById('answerText').textContent =
+                        'Error: ' + err.message +
+                        '\n\nThe service may be sleeping (Render free tier takes ~30s to wake up). Please try again.';
+                    const statusEl = document.getElementById('statusPill');
+                    statusEl.textContent = 'failed';
+                    statusEl.className = 'status-pill failed';
+                    document.getElementById('responseCard').classList.add('visible');
+                }
             } finally {
-                askBtn.disabled = false;
+                document.getElementById('sendBtn').style.display = 'inline-flex';
+                document.getElementById('stopBtn').classList.remove('visible');
+                document.getElementById('sendBtn').disabled = false;
+                currentController = null;
             }
         }
 
-        function handleEvent(event) {
-            const statusMap = {
-                'planning': { msg: 'Planning next action...', dot: 0 },
-                'retrieving': { msg: 'Searching documentation...', dot: 1 },
-                'synthesizing': { msg: 'Writing cited answer...', dot: 2 },
-                'criticizing': { msg: 'Verifying claims...', dot: 2 },
-                'critic_rejected': { msg: 'Critic found issues, retrying...', dot: 0 }
-            };
-
-            switch (event.type) {
-                case 'start':
-                    showStatus('Agent initialized, starting...', 0);
-                    break;
-                case 'step':
-                    const s = statusMap[event.status];
-                    if (s) showStatus(s.msg, s.dot);
-                    break;
-                case 'evidence':
-                    showStatus(`Found ${event.count} evidence chunks`, 1);
-                    break;
-                case 'done':
-                    showAnswer(event.result);
-                    break;
-                case 'refused':
-                    showRefusal(event.result);
-                    break;
-                case 'partial':
-                    showStatus(`Partial: ${event.result?.reason || 'unknown'}`, -1);
-                    setTimeout(() => {
-                        answerText.innerHTML = `<em>Could not complete: ${event.result?.reason || 'unknown'}</em>`;
-                        setHeader('error', 'Partial Result');
-                        showCard();
-                    }, 500);
-                    break;
-                case 'error':
-                    showError(event.result?.error_message || event.message || 'Unknown error');
-                    break;
+        function stopQuery() {
+            if (currentController) {
+                currentController.abort();
+                currentController = null;
             }
         }
+
+        // ============ Event listeners ============
+        document.getElementById('sendBtn').addEventListener('click', sendQuery);
+        document.getElementById('stopBtn').addEventListener('click', stopQuery);
+        document.getElementById('queryInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendQuery();
+        });
+        // Esc key stops the running query
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && currentController) stopQuery();
+        });
+
+        // ============ Init ============
+        renderStats();
+        renderHistory();
     </script>
 </body>
 </html>
