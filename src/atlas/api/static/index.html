@@ -581,7 +581,7 @@
                 <span class="badge">Groq LLM</span>
                 <span class="badge">Jina Embeddings</span>
                 <span class="badge accent">2,067 chunks</span>
-                <span class="badge success">83.3% Eval Pass</span>
+                
                 <span class="badge success">100% Grounding</span>
             </div>
         </header>
@@ -904,7 +904,11 @@
             stats.queries++;
             stats.tokens += response.cost_tokens || 0;
             stats.cost += (response.cost_tokens || 0) / 1_000_000 * COST_PER_MILLION_TOKENS;
-            if (response.status === 'completed') stats.success++;
+            // Change this:
+
+
+
+            if (response.status === 'completed' || response.status === 'refused') stats.success++;
             saveStats(stats);
             renderStats();
         }
